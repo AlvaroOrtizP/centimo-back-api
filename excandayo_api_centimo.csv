@@ -1,0 +1,102 @@
+ENTIDAD/TABLA,CAMPO (Java),COLUMNA (BD),TIPO Java,TIPO BD,RESTRICCIONES,ENUM VALORES,RELACIÓN
+,,,,,,,
+PLATAFORMA,plataformas,,,,,,
+Plataforma,plataformas,,,,,,
+, id,id, String,VARCHAR(50),PK,
+, nombre,nombre, String,VARCHAR(100),NOT NULL,
+, tipo,tipo,TipoPlataforma,VARCHAR(20),NOT NULL,"banco | inversion | cripto | p2p | crowdlending",
+, color,color, String,VARCHAR(7),NOT NULL,
+, icono,icono, String,VARCHAR(50),NOT NULL,
+, orden,orden, Integer,INTEGER,NOT NULL,
+, notasFijas,notas_fijas, String,TEXT,nullable,
+, fechaCreacion,fecha_creacion,LocalDateTime,TIMESTAMP,DEFAULT NOW() (solo lectura),
+, fechaActualizacion,fecha_actualizacion,LocalDateTime,TIMESTAMP,DEFAULT NOW(),
+, cuentas,, List<Cuenta>,--,OneToMany(mappedBy="plataforma", cascade=ALL; orphanRemoval),, Plataforma → Cuenta (1:N)
+,,,,,,,
+CUENTA,cuentas,,,,,,
+Cuenta,cuentas,,,,,,
+, id,id, String,VARCHAR(50),PK,
+, plataforma,plataforma_id, Plataforma,VARCHAR(50),NOT NULL FK → plataformas(id) ON DELETE CASCADE,ManyToOne LAZY,
+, nombre,nombre, String,VARCHAR(100),NOT NULL,
+, tipo,tipo,TipoCuenta,VARCHAR(20),NOT NULL,"corriente | ahorro | inversion | bolsillo",
+, moneda,moneda, String,VARCHAR(3),NOT NULL DEFAULT 'EUR',
+, orden,orden, Integer,INTEGER,NOT NULL,
+, fechaCreacion,fecha_creacion,LocalDateTime,TIMESTAMP,DEFAULT NOW() (solo lectura),
+, fechaActualizacion,fecha_actualizacion,LocalDateTime,TIMESTAMP,DEFAULT NOW(),
+,,,,,,,
+ASIGNACIÓN DE SALARIO,asignaciones_salario,,,,,,
+AsignacionSalario,asignaciones_salario,,,,,,
+, id,id, String,VARCHAR(50),PK,
+, anio,anio, Integer,INTEGER,NOT NULL,
+, mes,mes, Integer,INTEGER,NOT NULL CHECK (1-12),
+, plataforma,plataforma_id, Plataforma,VARCHAR(50),NOT NULL FK → plataformas(id),ManyToOne LAZY,
+, tipo,tipo,TipoAsignacion,VARCHAR(20),NOT NULL,"fijo | porcentaje",
+, valor,valor, BigDecimal,NUMERIC(10;2),NOT NULL,
+, nota,nota, String,TEXT,nullable,
+, fechaCreacion,fecha_creacion,LocalDateTime,TIMESTAMP,DEFAULT NOW() (solo lectura),
+, fechaActualizacion,fecha_actualizacion,LocalDateTime,TIMESTAMP,DEFAULT NOW(),
+,,,,,,,
+COMPROMISO,compromisos,,,,,,
+Compromiso,compromisos,,,,,,
+, id,id, String,VARCHAR(50),PK,
+, descripcion,descripcion, String,VARCHAR(200),NOT NULL,
+, mes,mes, Integer,INTEGER,NOT NULL CHECK (0-12),
+, anio,anio, Integer,,nullable,
+, tipo,tipo,TipoCompromiso,VARCHAR(20),NOT NULL,"mensual | anual | unico",
+, categoria,categoria,CategoriaCompromiso,VARCHAR(50),nullable,"impuestos | suscripciones | seguros | tramites | otros",
+, cantidad,cantidad, BigDecimal,NUMERIC(10;2),nullable,
+, esEstimado,es_estimado, Boolean,BOOLEAN,DEFAULT FALSE,
+, fechaCreacion,fecha_creacion,LocalDateTime,TIMESTAMP,DEFAULT NOW() (solo lectura),
+, fechaActualizacion,fecha_actualizacion,LocalDateTime,TIMESTAMP,DEFAULT NOW(),
+,,,,,,,
+ALERTA,alertas,,,,,,
+Alerta,alertas,,,,,,
+, id,id, String,VARCHAR(50),PK,
+, descripcion,descripcion, String,VARCHAR(200),NOT NULL,
+, mes,mes, Integer,INTEGER,NOT NULL CHECK (1-12),
+, anio,anio, Integer,INTEGER,NOT NULL,
+, fechaCreacion,fecha_creacion,LocalDateTime,TIMESTAMP,DEFAULT NOW() (solo lectura),
+, fechaActualizacion,fecha_actualizacion,LocalDateTime,TIMESTAMP,DEFAULT NOW(),
+,,,,,,,
+=== REPOSITORIOS ===,,,,,,,
+Repositorio,Método,Consulta,Tabla,BD,Parámetros,Retorna,Observaciones
+PlataformaRepository,findAll(),heredado,plataformas,,,"List<Plataforma>",JpaRepository
+CuentaRepository,findAll(),heredado,cuentas,,,"List<Cuenta>",JpaRepository
+CuentaRepository,findByPlataformaId(String),Spring Data derive,cuentas,WHERE plataforma_id = ?,plataformaId: String,"List<Cuenta>",
+CompromisoRepository,findAll(),heredado,compromisos,,,"List<Compromiso>",JpaRepository
+CompromisoRepository,findByMes(Integer),JPQL custom,compromisos,"WHERE tipo='mensual' OR (tipo='anual' AND mes=?) OR (tipo='unico' AND mes=?)",mes: Integer,"List<Compromiso>",
+AlertaRepository,findAll(),heredado,alertas,,,"List<Alerta>",JpaRepository
+AlertaRepository,findByAnioAndMes(Integer Integer),Spring Data derive,alertas,WHERE anio=? AND mes=?,"anio: Integer, mes: Integer","List<Alerta>",
+AsignacionSalarioRepository,findAll(),heredado,asignaciones_salario,,,"List<AsignacionSalario>",JpaRepository
+AsignacionSalarioRepository,findByAnioAndMes(Integer Integer),Spring Data derive,asignaciones_salario,WHERE anio=? AND mes=?,"anio: Integer, mes: Integer","List<AsignacionSalario>",
+,,,,,,,
+=== ENDPOINTS REST ===,,,,,,,
+Controller,Endpoint,Método HTTP,Parámetros,Rol,Retorna UseCase,Tabla BD,Operación
+PlataformaController,GET /plataformas,GET,--,Lectura,buscarTodas(),plataformas,SELECT * FROM plataformas
+PlataformaController,GET /plataformas/{id},GET,id (path),Lectura,buscarPorId(id),plataformas,SELECT * WHERE id=?
+PlataformaController,POST /plataformas,POST,body: Plataforma,Escritura,crear(plataforma),plataformas,INSERT
+PlataformaController,PUT /plataformas/{id},PUT,id (path) + body: Plataforma,Escritura,actualizar(id; plataforma),plataformas,UPDATE WHERE id=?
+PlataformaController,DELETE /plataformas/{id},DELETE,id (path),Escritura,eliminar(id),plataformas,DELETE WHERE id=?
+,,,,,,,
+CuentaController,GET /cuentas,GET,query opt: plataformaId,Lectura,buscarTodas(plataformaId),cuentas,"SELECT * (o WHERE plataforma_id=?)"
+CuentaController,GET /cuentas/{id},GET,id (path),Lectura,buscarPorId(id),cuentas,SELECT * WHERE id=?
+CuentaController,POST /cuentas,POST,body: Cuenta,Escritura,crear(cuenta),cuentas,INSERT
+CuentaController,PUT /cuentas/{id},PUT,id (path) + body: Cuenta,Escritura,actualizar(id; cuenta),cuentas,UPDATE WHERE id=?
+CuentaController,DELETE /cuentas/{id},DELETE,id (path),Escritura,eliminar(id),cuentas,DELETE WHERE id=?
+,,,,,,,
+CompromisoController,GET /compromisos,GET,query opt: mes,Lectura,buscarTodos() / buscarPorMes(mes),compromisos,SELECT * (o con filtro JPQL)
+CompromisoController,GET /compromisos/{id},GET,id (path),Lectura,buscarPorId(id),compromisos,SELECT * WHERE id=?
+CompromisoController,POST /compromisos,POST,body: Compromiso,Escritura,crear(compromiso),compromisos,INSERT
+CompromisoController,PUT /compromisos/{id},PUT,id (path) + body: Compromiso,Escritura,actualizar(id; compromiso),compromisos,UPDATE WHERE id=?
+CompromisoController,DELETE /compromisos/{id},DELETE,id (path),Escritura,eliminar(id),compromisos,DELETE WHERE id=?
+,,,,,,,
+AlertaController,GET /alertas,GET,query opt: anio + mes,Lectura,buscarTodas() / buscarPorAnioYMes(anio; mes),alertas,SELECT * (o WHERE anio=? AND mes=?)
+AlertaController,GET /alertas/{id},GET,id (path),Lectura,buscarPorId(id),alertas,SELECT * WHERE id=?
+AlertaController,POST /alertas,POST,body: Alerta,Escritura,crear(alerta),alertas,INSERT
+AlertaController,PUT /alertas/{id},PUT,id (path) + body: Alerta,Escritura,actualizar(id; alerta),alertas,UPDATE WHERE id=?
+AlertaController,DELETE /alertas/{id},DELETE,id (path),Escritura,eliminar(id),alertas,DELETE WHERE id=?
+,,,,,,,
+AsignacionSalarioController,GET /asignaciones-salario,GET,query oblig: anio + mes,Lectura,buscarPorAnioYMes(anio; mes),asignaciones_salario,SELECT * WHERE anio=? AND mes=?
+AsignacionSalarioController,POST /asignaciones-salario,POST,body: AsignacionSalario,Escritura,crear(asignacion),asignaciones_salario,INSERT
+AsignacionSalarioController,PUT /asignaciones-salario/{id},PUT,id (path) + body: AsignacionSalario,Escritura,actualizar(id; asignacion),asignaciones_salario,UPDATE WHERE id=?
+AsignacionSalarioController,DELETE /asignaciones-salario/{id},DELETE,id (path),Escritura,eliminar(id),asignaciones_salario,DELETE WHERE id=?

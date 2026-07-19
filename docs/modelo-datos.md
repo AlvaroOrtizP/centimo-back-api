@@ -42,7 +42,7 @@ interface Account {
   id: string;
   platformId: string;
   name: string;
-  type: AccountType; // 'checking' | 'savings' | 'investment' | 'pocket'
+  type: AccountType; // 'corriente' | 'ahorro' | 'inversion' | 'bolsillo'
   currency: string;  // 'EUR'
   order: number;
 }

@@ -27,7 +27,7 @@ Plataformas financieras (bancos, brokers, exchanges...).
 CREATE TABLE platforms (
   id          VARCHAR(50)  PRIMARY KEY,
   name        VARCHAR(100) NOT NULL,
-  type        VARCHAR(20)  NOT NULL,  -- bank | investment | crypto | p2p | crowdlending
+  type        VARCHAR(20)  NOT NULL,  -- banco | inversion | cripto | p2p | crowdlending
   color       VARCHAR(7)   NOT NULL,  -- hex (#004481)
   icon        VARCHAR(50)  NOT NULL,  -- Lucide icon name
   "order"     INTEGER      NOT NULL,
