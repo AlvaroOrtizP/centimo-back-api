@@ -1,5 +1,6 @@
 package com.mercadona.centimo.api.application.services;
 
+import com.mercadona.centimo.api.domain.NotFoundException;
 import com.mercadona.centimo.api.driven.jpa.Plataforma;
 import com.mercadona.centimo.api.driven.jpa.PlataformaRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,7 @@ public class PlataformaUseCase {
   @Transactional(readOnly = true)
   public Plataforma buscarPorId(String id) {
     return plataformaRepository.findById(id)
-      .orElseThrow(() -> new RuntimeException("Plataforma no encontrada: " + id));
+      .orElseThrow(() -> new NotFoundException("Plataforma", id));
   }
 
   @Transactional

@@ -2,6 +2,7 @@ package com.mercadona.centimo.api.driving.rest;
 
 import com.mercadona.centimo.api.application.services.PlataformaUseCase;
 import com.mercadona.centimo.api.driven.jpa.Plataforma;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,12 +28,12 @@ public class PlataformaController {
   }
 
   @PostMapping
-  public ResponseEntity<Plataforma> crear(@RequestBody Plataforma plataforma) {
+  public ResponseEntity<Plataforma> crear(@Valid @RequestBody Plataforma plataforma) {
     return ResponseEntity.status(HttpStatus.CREATED).body(plataformaUseCase.crear(plataforma));
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<Plataforma> actualizar(@PathVariable String id, @RequestBody Plataforma plataforma) {
+  public ResponseEntity<Plataforma> actualizar(@PathVariable String id, @Valid @RequestBody Plataforma plataforma) {
     return ResponseEntity.ok(plataformaUseCase.actualizar(id, plataforma));
   }
 
