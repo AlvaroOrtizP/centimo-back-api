@@ -8,7 +8,7 @@
 		<version>4.1.0</version>
 		<relativePath/>
 	</parent>
-	<groupId>com.mercadona.centimo</groupId>
+	<groupId>com.centimo</groupId>
 	<artifactId>centimo-back-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
@@ -31,17 +31,17 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>com.mercadona.centimo</groupId>
+				<groupId>com.centimo</groupId>
 				<artifactId>centimo-application</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.mercadona.centimo</groupId>
+				<groupId>com.centimo</groupId>
 				<artifactId>centimo-driving-api-rest</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.mercadona.centimo</groupId>
+				<groupId>com.centimo</groupId>
 				<artifactId>centimo-driven-postgres-repository</artifactId>
 				<version>${project.version}</version>
 			</dependency>
