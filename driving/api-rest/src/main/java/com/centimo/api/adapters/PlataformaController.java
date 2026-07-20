@@ -23,8 +23,10 @@ public class PlataformaController {
   private final PlataformaApiMapper mapper;
 
   /**
-   * Pantallas: Dashboard, MonthlyView, Trends, TradeLog, EntryForm, Income (SalaryConfig, SalaryDistribution), PlatformDetail.
-   * Carga inicial en FinancialDataService.ngOnInit() vía GET /plataformas.
+   * Usado en: Dashboard (colores y orden), Vista Mensual (nombre por cuenta),
+   * Tendencias (distribución por plataforma), Operaciones (filtro y P&L por plataforma),
+   * Entrada Datos (selector de plataforma), Nómina (destino de distribución),
+   * Detalle Plataforma (nombre, tipo, color).
    */
   @GetMapping
   public ResponseEntity<List<PlataformaDto>> buscarTodas() {
@@ -34,21 +36,21 @@ public class PlataformaController {
     return ResponseEntity.ok(dtos);
   }
 
-  /** No se usa actualmente en el frontend. */
+  /** Reservado para futuras pantallas de detalle de plataforma. */
   @GetMapping("/{id}")
   public ResponseEntity<PlataformaDto> buscarPorId(@PathVariable String id) {
     Plataforma plataforma = plataformaDrivingPort.buscarPorId(id);
     return ResponseEntity.ok(mapper.toDto(plataforma));
   }
 
-  /** No se usa actualmente en el frontend. */
+  /** Reservado para futura pantalla de admin de plataformas. */
   @PostMapping
   public ResponseEntity<PlataformaDto> crear(@Valid @RequestBody CreatePlataformaRequest request) {
     Plataforma plataforma = plataformaDrivingPort.crear(mapper.toDomain(request));
     return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toDto(plataforma));
   }
 
-  /** No se usa actualmente en el frontend. */
+  /** Reservado para futura pantalla de admin de plataformas. */
   @PutMapping("/{id}")
   public ResponseEntity<PlataformaDto> actualizar(
       @PathVariable String id,
@@ -57,7 +59,7 @@ public class PlataformaController {
     return ResponseEntity.ok(mapper.toDto(plataforma));
   }
 
-  /** No se usa actualmente en el frontend. */
+  /** Reservado para futura pantalla de admin de plataformas. */
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> eliminar(@PathVariable String id) {
     plataformaDrivingPort.eliminar(id);

@@ -23,8 +23,10 @@ public class CuentaController {
   private final CuentaApiMapper mapper;
 
   /**
-   * Pantallas: Dashboard, MonthlyView, Trends, TradeLog, EntryForm, Income, PlatformDetail.
-   * Carga inicial en FinancialDataService.ngOnInit() vía GET /cuentas.
+   * Usado en: Dashboard (relación cuentas→plataformas), Vista Mensual (desglose por cuenta),
+   * Tendencias (distribución por plataforma), Operaciones (filtro por plataforma),
+   * Entrada Datos (cuentas disponibles), Nómina (snapshot para registrar ingresos),
+   * Detalle Plataforma (cuentas de la plataforma).
    */
   @GetMapping
   public ResponseEntity<List<CuentaDto>> buscarTodas(
@@ -35,21 +37,21 @@ public class CuentaController {
     return ResponseEntity.ok(dtos);
   }
 
-  /** No se usa actualmente en el frontend. */
+  /** Reservado para futuras pantallas de detalle de cuenta. */
   @GetMapping("/{id}")
   public ResponseEntity<CuentaDto> buscarPorId(@PathVariable String id) {
     Cuenta cuenta = cuentaDrivingPort.buscarPorId(id);
     return ResponseEntity.ok(mapper.toDto(cuenta));
   }
 
-  /** No se usa actualmente en el frontend. */
+  /** Reservado para futura pantalla de admin de cuentas. */
   @PostMapping
   public ResponseEntity<CuentaDto> crear(@Valid @RequestBody CreateCuentaRequest request) {
     Cuenta cuenta = cuentaDrivingPort.crear(mapper.toDomain(request));
     return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toDto(cuenta));
   }
 
-  /** No se usa actualmente en el frontend. */
+  /** Reservado para futura pantalla de admin de cuentas. */
   @PutMapping("/{id}")
   public ResponseEntity<CuentaDto> actualizar(
       @PathVariable String id,
@@ -58,7 +60,7 @@ public class CuentaController {
     return ResponseEntity.ok(mapper.toDto(cuenta));
   }
 
-  /** No se usa actualmente en el frontend. */
+  /** Reservado para futura pantalla de admin de cuentas. */
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> eliminar(@PathVariable String id) {
     cuentaDrivingPort.eliminar(id);
