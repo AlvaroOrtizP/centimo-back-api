@@ -9,7 +9,7 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface CuentaMapper {
 
-  @Mapping(target = "plataformaId", source = "mo.plataformaId")
+  @Mapping(target = "plataformaId", expression = "java(mo.getPlataforma() != null ? mo.getPlataforma().getId() : null)")
   Cuenta toDomain(CuentaMO mo);
 
   @Mapping(target = "plataforma", ignore = true)

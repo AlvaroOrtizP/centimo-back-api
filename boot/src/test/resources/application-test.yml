@@ -1,0 +1,28 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate.generate_statistics: true
+
+  flyway:
+    enabled: false
+
+decorator:
+  datasource:
+    datasource-proxy:
+      logging: slf4j
+      query:
+        enable-logging: true
+        log-level: info
+        logger-name: net.ttddyy.dsproxy.listener
+      multiline: false
+      json-format: true
+      slow-query:
+        enable-logging: false
+      count-query: false
+
+logging:
+  level:
+    org.hibernate.SQL: WARN
+    net.ttddyy.dsproxy.listener: INFO

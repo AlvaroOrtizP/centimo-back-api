@@ -1,0 +1,7 @@
+# Centimo - Reglas del proyecto
+
+## Dependencias
+
+- NO usar dependencias de Mercadona (`com.mercadona.*`).
+- NO usar el parent POM `com.mercadona.framework.cna:fwkcna-parent`.
+- Proyecto independiente: parent es `org.springframework.boot:spring-boot-starter-parent`.
