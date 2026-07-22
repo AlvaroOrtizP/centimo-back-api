@@ -16,10 +16,4 @@ public interface InstantaneaMensualMapper {
   @Mapping(target = "cuentaId", ignore = true)
   InstantaneaMensualMO toMO(InstantaneaMensual domain);
 
-  @Mapping(target = "id", ignore = true)
-  @Mapping(target = "cuenta", ignore = true)
-  @Mapping(target = "cuentaId", ignore = true)
-  @Mapping(target = "fechaCreacion", ignore = true)
-  @Mapping(target = "fechaActualizacion", ignore = true)
-  void updateMO(InstantaneaMensual domain, @MappingTarget InstantaneaMensualMO mo);
 }
