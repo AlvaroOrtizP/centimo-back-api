@@ -513,39 +513,36 @@ paths:
   # ════════════════════════════════════════════
 
   # ── Snapshots ──
-  /snapshots:
+  /snapshots/accounts/{year}/{month}:
     get:
-      tags: [Snapshots]
-      operationId: listSnapshots
-      summary: Listar snapshots
+      tags: [ Snapshots ]
+      operationId: getSnapshotByAccountAndDate
+      summary: Obtener la instantánea única de una cuenta en un mes concreto
       parameters:
         - name: year
-          in: query
+          in: path
+          required: true
           schema:
             type: integer
+          example: 2026
         - name: month
-          in: query
+          in: path
+          required: true
           schema:
             type: integer
             minimum: 1
             maximum: 12
-        - name: accountId
-          in: query
-          schema:
-            type: string
+          example: 7
       responses:
         '200':
-          description: Lista de snapshots
+          description: Instantánea encontrada
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/MonthlySnapshot'
-        '400':
-          description: Error generico 400
+                $ref: '#/components/schemas/SnapshotResponse'
         '404':
-          description: Error generico 404
+          description: No existe instantánea para esa cuenta en el mes indicado
+  /snapshots:
     post:
       tags: [Snapshots]
       operationId: createSnapshot
@@ -562,7 +559,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MonthlySnapshot'
+                $ref: '#/components/schemas/SnapshotResponse'
         '400':
           description: Error generico 400
         '404':
@@ -581,7 +578,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MonthlySnapshot'
+                $ref: '#/components/schemas/SnapshotResponse'
         '404':
           $ref: '#/components/responses/NotFound'
     put:
@@ -600,7 +597,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MonthlySnapshot'
+                $ref: '#/components/schemas/SnapshotResponse'
         '404':
           $ref: '#/components/responses/NotFound'
     delete:
@@ -633,7 +630,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MonthlySnapshot'
+                $ref: '#/components/schemas/SnapshotResponse'
         '400':
           description: Error generico 400
         '404':
@@ -800,7 +797,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MonthlySnapshot'
+                $ref: '#/components/schemas/SnapshotResponse'
         '404':
           $ref: '#/components/responses/NotFound'
 
@@ -1641,7 +1638,7 @@ components:
           type: integer
 
     # ═══════════ MonthlySnapshot ═══════════
-    MonthlySnapshot:
+    SnapshotResponse:
       type: object
       required: [id, accountId, year, month, balance, income, expenses]
       properties:
@@ -1657,16 +1654,16 @@ components:
           maximum: 12
         balance:
           type: number
-          format: float
+          format: decimal
         income:
           type: number
-          format: float
+          format: decimal
         expenses:
           type: number
-          format: float
+          format: decimal
         contribution:
           type: number
-          format: float
+          format: decimal
           nullable: true
         notes:
           type: string

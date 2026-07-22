@@ -21,55 +21,8 @@ public class InstantaneaMensualDatasourceAdapter implements InstantaneaDrivenPor
   private final InstantaneaMensualMapper mapper;
 
   @Override
-  public List<InstantaneaMensual> findAll() {
-    return instantaneaRepository.findAll().stream()
-      .map(mapper::toDomain)
-      .toList();
-  }
-
-  @Override
-  public List<InstantaneaMensual> findByAnioAndMes(Integer anio, Integer mes) {
-    return instantaneaRepository.findByAnioAndMes(anio, mes).stream()
-      .map(mapper::toDomain)
-      .toList();
-  }
-
-  @Override
-  public List<InstantaneaMensual> findByCuentaId(String cuentaId) {
-    return instantaneaRepository.findByCuentaId(cuentaId).stream()
-      .map(mapper::toDomain)
-      .toList();
-  }
-
-  @Override
-  public List<InstantaneaMensual> findByAnioMesAndCuentaId(Integer anio, Integer mes, String cuentaId) {
-    return instantaneaRepository.findByAnioAndMesAndCuentaId(anio, mes, cuentaId).stream()
-      .map(mapper::toDomain)
-      .toList();
-  }
-
-  @Override
-  public Optional<InstantaneaMensual> findByCuentaIdAndAnioAndMes(String cuentaId, Integer anio, Integer mes) {
-    return instantaneaRepository.findByCuentaIdAndAnioAndMes(cuentaId, anio, mes).map(mapper::toDomain);
-  }
-
-  @Override
-  public Optional<InstantaneaMensual> findById(String id) {
-    return instantaneaRepository.findById(id).map(mapper::toDomain);
-  }
-
-  @Override
-  public InstantaneaMensual save(InstantaneaMensual instantanea) {
-    InstantaneaMensualMO mo = mapper.toMO(instantanea);
-    if (instantanea.getCuentaId() != null && mo.getCuenta() == null) {
-      mo.setCuenta(cuentaRepository.getReferenceById(instantanea.getCuentaId()));
-    }
-    InstantaneaMensualMO saved = instantaneaRepository.save(mo);
-    return mapper.toDomain(saved);
-  }
-
-  @Override
-  public void deleteById(String id) {
-    instantaneaRepository.deleteById(id);
+  public InstantaneaMensual findByAnioAndMes(Integer anio, Integer mes) {
+    var instantaneaMensual = instantaneaRepository.findByAnioAndMes(anio, mes);
+    return mapper.toDomain(instantaneaMensual);
   }
 }
