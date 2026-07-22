@@ -509,16 +509,81 @@ paths:
           $ref: '#/components/responses/NotFound'
 
   # ════════════════════════════════════════════
+  #  Nomina
+  # ════════════════════════════════════════════
+
+  # ── Nomina ──
+  /nomina/{year}/{month}:
+    get:
+      tags: [ Nomina ]
+      operationId: getNominaAndDate
+      summary: Obtener la nomina única en un mes concreto
+      parameters:
+        - name: year
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 2026
+        - name: month
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+          example: 7
+      responses:
+        '200':
+          description: Nomina encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NominaResponse'
+        '404':
+          description: No existe nomina en el mes indicado
+
+  /nomina:
+    post:
+      tags: [ Nomina ]
+      operationId: createNomina
+      summary: Crear nomina
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NominaCreate'
+      responses:
+        '201':
+          description: Creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NominaResponse'
+        '400':
+          description: Error generico 400
+        '404':
+          description: Error generico 404
+
+
+  # ════════════════════════════════════════════
   #  SEGUIMIENTO MENSUAL
   # ════════════════════════════════════════════
 
   # ── Snapshots ──
-  /snapshots/accounts/{year}/{month}:
+  /snapshots/accounts/{accountId}/{year}/{month}:
     get:
       tags: [ Snapshots ]
       operationId: getSnapshotByAccountAndDate
       summary: Obtener la instantánea única de una cuenta en un mes concreto
       parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "acc_bbva_1"
         - name: year
           in: path
           required: true
@@ -1636,6 +1701,42 @@ components:
           maximum: 12
         year:
           type: integer
+
+    NominaResponse:
+      type: object
+      required: [ id, year, month, value ]
+      properties:
+        id:
+          type: string
+        year:
+          type: integer
+        month:
+          type: integer
+          minimum: 1
+          maximum: 12
+        value:
+          type: number
+          format: decimal
+        notes:
+          type: string
+          nullable: true
+
+    NominaCreate:
+      type: object
+      required: [ year, month, value ]
+      properties:
+        year:
+          type: integer
+        month:
+          type: integer
+          minimum: 1
+          maximum: 12
+        value:
+          type: number
+          format: decimal
+        notes:
+          type: string
+          nullable: true
 
     # ═══════════ MonthlySnapshot ═══════════
     SnapshotResponse:

@@ -1,8 +1,14 @@
 package com.centimo.api.ports.driving;
 
 import com.centimo.api.domain.models.InstantaneaMensual;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 public interface InstantaneaDrivingPort {
 
-    InstantaneaMensual obtenerPorFecha(Integer year, Integer month);
+    Optional<InstantaneaMensual> obtenerPorFecha(String accountId, Integer year, Integer month);
+
+    @Transactional
+    InstantaneaMensual crear(InstantaneaMensual nuevaInstantanea);
 }

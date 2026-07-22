@@ -2,9 +2,10 @@ package com.centimo.api.ports.driven;
 
 import com.centimo.api.domain.models.InstantaneaMensual;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface InstantaneaDrivenPort {
-  InstantaneaMensual findByAnioAndMes(Integer anio, Integer mes);
+  Optional<InstantaneaMensual> findByAnioAndMes(String accountId, Integer anio, Integer mes);
+
+  InstantaneaMensual guardar(InstantaneaMensual instantanea);
 }
