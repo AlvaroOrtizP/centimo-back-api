@@ -1,38 +1,23 @@
 package com.centimo.api.it;
 
-import com.centimo.api.it.support.StatisticsAssert;
-import com.centimo.api.database.models.CuentaMO;
-import com.centimo.api.database.models.InstantaneaMensualMO;
-import com.centimo.api.database.models.PlataformaMO;
-import com.centimo.api.database.repositories.CuentaRepository;
 import com.centimo.api.database.repositories.InstantaneaMensualRepository;
-import com.centimo.api.database.repositories.PlataformaRepository;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.system.CapturedOutput;
-import org.springframework.http.MediaType;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 //@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class InstantaneaControllerIT extends AbstractIntegrationIT {
 
-  private static final String PLATAFORMA_ID = "bbva-it";
-  private static final String CUENTA_ID = "bbva-it-nomina";
-  private static final String INSTANTANEA_ID = "bbva-it-nomina-2026-07";
+    private static final String PLATAFORMA_ID = "bbva-it";
+    private static final String CUENTA_ID = "bbva-it-nomina";
+    private static final String INSTANTANEA_ID = "bbva-it-nomina-2026-07";
 
-  @Autowired
-  PlataformaRepository plataformaRepository;
+    //@Autowired
+    //PlataformaRepository plataformaRepository;
 
-  @Autowired
-  CuentaRepository cuentaRepository;
+    //@Autowired
+    //CuentaRepository cuentaRepository;
 
-  @Autowired
-  InstantaneaMensualRepository instantaneaRepository;
+    @Autowired
+    InstantaneaMensualRepository instantaneaRepository;
 
   /*@Test
   @Order(1)
