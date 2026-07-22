@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -33,6 +34,14 @@ public class InstantaneaMensualDatasourceAdapter implements InstantaneaDrivenPor
         return instantaneaRepository
                 .findByCuentaIdAndAnioAndMes(accountId, anio, mes)
                 .map(mapper::toDomain);
+    }
+
+    @Override
+    public List<InstantaneaMensual> findAll() {
+        return instantaneaRepository.findAll()
+                .stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 
     @Override

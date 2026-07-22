@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,6 +24,15 @@ public class InstantaneaController implements SnapshotsApi {
     private final InstantaneaDrivingPort instantaneaDrivingPort;
     private final InstantaneaApiMapper mapper;
 
+    @Override
+    public ResponseEntity<List<SnapshotResponse>> listSnapshots() {
+        log.info("listSnapshots");
+        List<SnapshotResponse> snapshots = instantaneaDrivingPort.listarTodas()
+                .stream()
+                .map(mapper::toSnapshotResponse)
+                .toList();
+        return ResponseEntity.ok(snapshots);
+    }
 
     @Override
     public ResponseEntity<SnapshotResponse> getSnapshotByAccountAndDate(

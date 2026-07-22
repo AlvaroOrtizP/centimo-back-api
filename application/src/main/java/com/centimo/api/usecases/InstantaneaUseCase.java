@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -19,6 +20,11 @@ public class InstantaneaUseCase implements InstantaneaDrivingPort {
   @Override
   public Optional<InstantaneaMensual> obtenerPorFecha(String accountId, Integer year, Integer month) {
     return instantaneaDrivenPort.findByAnioAndMes(accountId, year, month);
+  }
+
+  @Override
+  public List<InstantaneaMensual> listarTodas() {
+    return instantaneaDrivenPort.findAll();
   }
 
   @Transactional

@@ -608,6 +608,19 @@ paths:
         '404':
           description: No existe instantánea para esa cuenta en el mes indicado
   /snapshots:
+    get:
+      tags: [Snapshots]
+      operationId: listSnapshots
+      summary: Listar todas las instantaneas
+      responses:
+        '200':
+          description: Lista de instantaneas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SnapshotResponse'
     post:
       tags: [Snapshots]
       operationId: createSnapshot

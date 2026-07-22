@@ -14,6 +14,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class FlujoCompletoIT extends AbstractIntegrationIT {
+
+    //TODO la aplicacion llama a listSnapshots al principio para poder saber en "entrada datos" que valores tienen esos meses
+
     /*@Test
     @Order(1)
     void crearPlataformaBase(CapturedOutput output) throws Exception {
