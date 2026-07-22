@@ -23,4 +23,5 @@ INSERT INTO cuentas (id, plataforma_id, nombre, tipo, orden) VALUES
   ('mintos-main',        'mintos',     'Principal',       'inversion', 1),
   ('equito-main',        'equito',     'Principal',       'inversion', 1),
   ('urbanitae-main',     'urbanitae',  'Principal',       'inversion', 1),
-  ('bitvavo-main',       'bitvavo',    'Portfolio',       'inversion', 1);
+  ('bitvavo-main',       'bitvavo',    'Portfolio',       'inversion', 1),
+('bbva-gasto',       'bbva',    'Gasto',       'corriente', 1);

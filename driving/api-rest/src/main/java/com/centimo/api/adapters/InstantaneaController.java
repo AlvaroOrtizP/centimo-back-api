@@ -54,7 +54,7 @@ public class InstantaneaController implements SnapshotsApi {
     *
     *
     *
-    * Ventaja: Al tenerlo todo agrupado por instantánea, cuando consultas la vista mensual de un mes,
+    * Ventaja: Al tenerlo toda agrupado por instantánea, cuando consultas la vista mensual de un mes,
 solo necesitas: "dame las instantáneas de julio 2026" y con ellas llegan todos sus gastos,
 ingresos y tareas.
      */
