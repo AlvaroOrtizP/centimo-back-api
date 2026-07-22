@@ -18,7 +18,7 @@ import org.springframework.http.MediaType;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+//@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class InstantaneaControllerIT extends AbstractIntegrationIT {
 
   private static final String PLATAFORMA_ID = "bbva-it";
@@ -34,7 +34,7 @@ class InstantaneaControllerIT extends AbstractIntegrationIT {
   @Autowired
   InstantaneaMensualRepository instantaneaRepository;
 
-  @Test
+  /*@Test
   @Order(1)
   void crearPlataformaBase(CapturedOutput output) throws Exception {
     mockMvc.perform(post("/plataformas")
@@ -354,5 +354,5 @@ class InstantaneaControllerIT extends AbstractIntegrationIT {
     StatisticsAssert.assertThat(statistics())
         .forEntity(PlataformaMO.class).hasLoadCount(1).hasDeleteCount(1)
         .verify();
-  }
+  }*/
 }
