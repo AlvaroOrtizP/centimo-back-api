@@ -31,7 +31,7 @@ public class NominaMO {
     private BigDecimal valor = BigDecimal.ZERO;
 
     @Column(name = "nota", columnDefinition = "TEXT")
-    private String notas;
+    private String nota;
 
     @CreationTimestamp
     @Column(name = "fecha_creacion", updatable = false)

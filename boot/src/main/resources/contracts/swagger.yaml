@@ -1717,7 +1717,7 @@ components:
         value:
           type: number
           format: decimal
-        notes:
+        note:
           type: string
           nullable: true
 
@@ -1734,7 +1734,7 @@ components:
         value:
           type: number
           format: decimal
-        notes:
+        note:
           type: string
           nullable: true
 

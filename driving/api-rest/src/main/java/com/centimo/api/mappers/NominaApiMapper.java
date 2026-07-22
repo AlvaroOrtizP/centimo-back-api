@@ -12,14 +12,14 @@ public interface NominaApiMapper {
   @Mapping(target = "year", source = "anio")
   @Mapping(target = "month", source = "mes")
   @Mapping(target = "value", source = "valor")
-  @Mapping(target = "notes", source = "notas")
+  @Mapping(target = "note", source = "nota")
   NominaResponse toNominaResponse(Nomina nomina);
 
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "anio", source = "year")
   @Mapping(target = "mes", source = "month")
   @Mapping(target = "valor", source = "value")
-  @Mapping(target = "notas", source = "notes")
+  @Mapping(target = "nota", source = "note")
   @Mapping(target = "fechaCreacion", ignore = true)
   @Mapping(target = "fechaActualizacion", ignore = true)
   Nomina toDomain(NominaCreate request);

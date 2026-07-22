@@ -20,7 +20,7 @@ public class Nomina {
   private Integer anio;
   private Integer mes;
   private BigDecimal valor;
-  private String notas;
+  private String nota;
   private LocalDateTime fechaCreacion;
   private LocalDateTime fechaActualizacion;
 }
