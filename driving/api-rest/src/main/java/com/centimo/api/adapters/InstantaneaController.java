@@ -23,9 +23,7 @@ public class InstantaneaController implements SnapshotsApi {
     private final InstantaneaDrivingPort instantaneaDrivingPort;
     private final InstantaneaApiMapper mapper;
 
-    /**
-     * Usado en: Nomina (En caso de existir registro para ese mes/año devuelve los datos)
-     */
+
     @Override
     public ResponseEntity<SnapshotResponse> getSnapshotByAccountAndDate(
             String accountId,
@@ -47,6 +45,19 @@ public class InstantaneaController implements SnapshotsApi {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    /*
+    * Permite registrar un nuevo registro para ese mes. Se usa desde las pestañas:
+    *  B100 save
+    *  B100 heal
+    *  revolut
+    *  gastos
+    *
+    *
+    *
+    * Ventaja: Al tenerlo todo agrupado por instantánea, cuando consultas la vista mensual de un mes,
+solo necesitas: "dame las instantáneas de julio 2026" y con ellas llegan todos sus gastos,
+ingresos y tareas.
+     */
     @Override
     public ResponseEntity<SnapshotResponse> upsertSnapshot(SnapshotUpsert snapshotUpsert) {
         log.info("upsertSnapshot");

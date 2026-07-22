@@ -20,6 +20,10 @@ public class NominaController implements NominaApi {
     private final NominaDrivingPort nominaDrivingPort;
     private final NominaApiMapper mapper;
 
+    /*
+     * Nominas -> distribucion mensual
+     *      Se llama al entrar para comprobar si ya existe una nomima en ese mes-anio
+     */
     @Override
     public ResponseEntity<NominaResponse> getNominaAndDate(
             Integer year,
@@ -31,6 +35,10 @@ public class NominaController implements NominaApi {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    /*
+     * Nomina -> distribucion mensual
+     *      Permite crear un nuevo registro para ese mes / nomina
+     */
     @Override
     public ResponseEntity<NominaResponse> createNomina(NominaCreate nominaCreate) {
         log.info("createNomina");
