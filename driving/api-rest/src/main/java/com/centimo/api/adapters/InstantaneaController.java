@@ -4,6 +4,7 @@ import com.centimo.api.SnapshotsApi;
 import com.centimo.api.domain.models.InstantaneaMensual;
 import com.centimo.api.dto.MonthlySnapshotCreate;
 import com.centimo.api.dto.SnapshotResponse;
+import com.centimo.api.dto.SnapshotUpsert;
 import com.centimo.api.mappers.InstantaneaApiMapper;
 import com.centimo.api.ports.driving.InstantaneaDrivingPort;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.math.BigDecimal;
 
 @RestController
 @RequiredArgsConstructor
@@ -38,16 +41,23 @@ public class InstantaneaController implements SnapshotsApi {
     @Override
     public ResponseEntity<SnapshotResponse> createSnapshot(MonthlySnapshotCreate monthlySnapshotCreate) {
         log.info("createSnapshot");
-        // 1. Mapeamos el DTO de la API (MonthlySnapshotCreate) al Modelo de Dominio (InstantaneaMensual)
         InstantaneaMensual modeloEntrada = mapper.toDomain(monthlySnapshotCreate);
-
-        // 2. Ejecutamos el caso de uso
         InstantaneaMensual modeloCreado = instantaneaDrivingPort.crear(modeloEntrada);
-
-        // 3. Mapeamos la respuesta al DTO OpenAPI (SnapshotResponse)
         SnapshotResponse response = mapper.toSnapshotResponse(modeloCreado);
-
-        // 4. Retornamos HTTP 201 CREATED
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Override
+    public ResponseEntity<SnapshotResponse> upsertSnapshot(SnapshotUpsert snapshotUpsert) {
+        log.info("upsertSnapshot");
+        InstantaneaMensual resultado = instantaneaDrivingPort.upsert(
+                snapshotUpsert.getAccountId(),
+                snapshotUpsert.getYear(),
+                snapshotUpsert.getMonth(),
+                BigDecimal.valueOf(snapshotUpsert.getBalance()),
+                BigDecimal.valueOf(snapshotUpsert.getIncomeDelta()),
+                snapshotUpsert.getExpenses() != null ? BigDecimal.valueOf(snapshotUpsert.getExpenses()) : null);
+        SnapshotResponse response = mapper.toSnapshotResponse(resultado);
+        return ResponseEntity.ok(response);
     }
 }

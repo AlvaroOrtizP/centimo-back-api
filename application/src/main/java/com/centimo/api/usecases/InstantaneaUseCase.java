@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @Service
@@ -23,9 +24,33 @@ public class InstantaneaUseCase implements InstantaneaDrivingPort {
   @Transactional
   @Override
   public InstantaneaMensual crear(InstantaneaMensual nuevaInstantanea) {
-    // Aquí puedes agregar validaciones de negocio adicionales
-    // Ej. verificar que no exista ya una instantánea para la misma cuenta en el mismo mes/año
-
     return instantaneaDrivenPort.guardar(nuevaInstantanea);
+  }
+
+  @Transactional
+  @Override
+  public InstantaneaMensual upsert(String accountId, Integer year, Integer month,
+                                   BigDecimal balance, BigDecimal incomeDelta, BigDecimal expenses) {
+    Optional<InstantaneaMensual> existente = instantaneaDrivenPort.findByAnioAndMes(accountId, year, month);
+
+    if (existente.isPresent()) {
+      InstantaneaMensual instantanea = existente.get();
+      instantanea.setSaldo(balance);
+      instantanea.setIngresos(instantanea.getIngresos().add(incomeDelta));
+      if (expenses != null) {
+        instantanea.setGastos(expenses);
+      }
+      return instantaneaDrivenPort.guardar(instantanea);
+    }
+
+    InstantaneaMensual nueva = InstantaneaMensual.builder()
+        .cuentaId(accountId)
+        .anio(year)
+        .mes(month)
+        .saldo(balance)
+        .ingresos(incomeDelta)
+        .gastos(expenses != null ? expenses : BigDecimal.ZERO)
+        .build();
+    return instantaneaDrivenPort.guardar(nueva);
   }
 }
