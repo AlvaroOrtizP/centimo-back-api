@@ -121,20 +121,34 @@ class GastoIT extends AbstractIntegrationIT {
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.amount").value(5.0));
 
-        // Comprobar que la instantánea tiene gastos totales de 25
+        // Llamada a createExpense: gasto de 6.23 para el día 13 (creamos un segundo gasto para el dia 13)
+        mockMvc.perform(post("/expenses")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                    {
+                      "snapshotId": "%s",
+                      "category": "ocio",
+                      "amount": 6.23,
+                      "date": "2026-07-13"
+                    }
+                    """.formatted(INSTANTANEA_ID)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.amount").value(6.23));
+
+        // Comprobar que la instantánea tiene gastos totales de 31.23
         Float gastosTotal = jdbcTemplate.queryForObject(
             "SELECT gastos FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
             Float.class, CUENTA_ID, 2026, 7);
-        assertThat(gastosTotal).isEqualTo(25f);
+        assertThat(gastosTotal).isEqualTo(31.23f);
 
         // Listar gastos de la instantánea (debe devolver 2 registros)
         mockMvc.perform(get("/expenses").param("snapshotId", INSTANTANEA_ID))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$").isArray())
-            .andExpect(jsonPath("$.length()").value(2));
+            .andExpect(jsonPath("$.length()").value(3));
 
         // Comprobar que hay 2 registros en gastos y 1 en instantanea
-        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM gastos", Integer.class)).isEqualTo(2);
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM gastos", Integer.class)).isEqualTo(3);
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM instantaneas_mensuales", Integer.class)).isOne();
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM plataformas", Integer.class)).isOne();
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cuentas", Integer.class)).isOne();
