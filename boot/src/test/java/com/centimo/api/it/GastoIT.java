@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -17,7 +18,18 @@ class GastoIT extends AbstractIntegrationIT {
 
     /**
      * En este test de integracion probamos todas las funcionaldiades de la pantalla gastos
+     *
+     * Comprobar que no existen datos
+     *
+     * Crear cuenta e instantanea para ese anio/mes
+     *
+     * Listar los gastos para ese registro: da 0
+     *
      * Crear varios gastos, comprobar que se suman sus valores en la instantanea de ese mes para gastos
+     *
+     * Listar los gastos para ese registro: da 2
+     *
+     * Editar registros
      */
 
     private static final String PLATAFORMA_ID = "bbva-it";
@@ -75,6 +87,12 @@ class GastoIT extends AbstractIntegrationIT {
             Float.class, CUENTA_ID, 2026, 7);
         assertThat(gastosInstantanea).isEqualTo(0f);
 
+        // Listar gastos de la instantánea (debe devolver vacío)
+        mockMvc.perform(get("/expenses").param("snapshotId", INSTANTANEA_ID))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$").isArray())
+            .andExpect(jsonPath("$").isEmpty());
+
         // Llamada a createExpense: gasto de 20 para el día 2
         mockMvc.perform(post("/expenses")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -108,6 +126,12 @@ class GastoIT extends AbstractIntegrationIT {
             "SELECT gastos FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
             Float.class, CUENTA_ID, 2026, 7);
         assertThat(gastosTotal).isEqualTo(25f);
+
+        // Listar gastos de la instantánea (debe devolver 2 registros)
+        mockMvc.perform(get("/expenses").param("snapshotId", INSTANTANEA_ID))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$").isArray())
+            .andExpect(jsonPath("$.length()").value(2));
 
         // Comprobar que hay 2 registros en gastos y 1 en instantanea
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM gastos", Integer.class)).isEqualTo(2);

@@ -25,7 +25,9 @@ public class GastoDatasourceAdapter implements GastoDrivenPort {
 
     @Override
     public List<Gasto> findByInstantaneaId(String instantaneaId) {
-        return gastoRepository.findByInstantaneaId(instantaneaId)
+        return resolveInstantanea(instantaneaId)
+                .map(instantanea -> gastoRepository.findByInstantaneaId(instantanea.getId()))
+                .orElse(List.of())
                 .stream()
                 .map(mapper::toDomain)
                 .toList();
