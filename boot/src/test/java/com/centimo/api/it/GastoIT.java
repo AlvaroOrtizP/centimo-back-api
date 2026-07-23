@@ -1,32 +1,40 @@
 package com.centimo.api.it;
 
 import com.jayway.jsonpath.JsonPath;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc(addFilters = false)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class GastoIT extends AbstractIntegrationIT {
 
     /**
-     * En este test de integracion probamos todas las funcionaldiades de la pantalla gastos
-     * Comprobar que no existen datos
-     * Crear cuenta e instantanea para ese anio/mes
-     * Listar los gastos para ese registro: da 0
-     * Crear varios gastos, comprobar que se suman sus valores en la instantanea de ese mes para gastos
-     * Listar los gastos para ese registro: da 2
-     * Editar registros
+     * Test de integracion de la pantalla gastos:
+     * 1. Comprobar tablas vacias
+     * 2. Crear plataforma y cuenta
+     * 3. Crear instantanea para ese anio/mes
+     * 4. Listar gastos: da 0
+     * 5. Crear varios gastos, comprobar que se suman en la instantanea
+     * 6. Listar gastos: da 3
+     * 7. Editar un gasto, comprobar recalculo en instantanea
+     * 8. Eliminar un gasto, comprobar recalculo en instantanea
      */
 
     private static final String PLATAFORMA_ID = "bbva-it";
@@ -37,15 +45,18 @@ class GastoIT extends AbstractIntegrationIT {
     private JdbcTemplate jdbcTemplate;
 
     @Test
-    void gastoFlow(CapturedOutput capturedOutput) throws Exception {
-        // Verificar que no existen datos en gastos ni instantaneas
+    @Order(1)
+    void tablasVacias(CapturedOutput capturedOutput) throws Exception {
         Integer gastosCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM gastos", Integer.class);
         Integer instantaneasCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM instantaneas_mensuales", Integer.class);
 
         assertThat(gastosCount).isZero();
         assertThat(instantaneasCount).isZero();
+    }
 
-        // Crear plataforma y cuenta directamente (no hay endpoints REST aún)
+    @Test
+    @Order(2)
+    void crearPlataformaYCuenta(CapturedOutput capturedOutput) throws Exception {
         jdbcTemplate.update(
             "INSERT INTO plataformas (id, nombre, tipo, color, icono, orden) VALUES (?, ?, ?, ?, ?, ?)",
             PLATAFORMA_ID, "BBVA IT", "banco", "#004481", "building", 1);
@@ -53,7 +64,11 @@ class GastoIT extends AbstractIntegrationIT {
         jdbcTemplate.update(
             "INSERT INTO cuentas (id, plataforma_id, nombre, tipo, moneda, orden) VALUES (?, ?, ?, ?, ?, ?)",
             CUENTA_ID, PLATAFORMA_ID, "Nomina IT", "corriente", "EUR", 1);
+    }
 
+    @Test
+    @Order(3)
+    void crearSnapshot(CapturedOutput capturedOutput) throws Exception {
         // Llamada a upsertSnapshot
         mockMvc.perform(post("/snapshots/upsert")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -83,13 +98,20 @@ class GastoIT extends AbstractIntegrationIT {
             "SELECT gastos FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
             Float.class, CUENTA_ID, 2026, 7);
         assertThat(gastosInstantanea).isEqualTo(0f);
+    }
 
-        // Listar gastos de la instantánea (debe devolver vacío)
+    @Test
+    @Order(4)
+    void listarGastosVacio(CapturedOutput capturedOutput) throws Exception {
         mockMvc.perform(get("/expenses").param("snapshotId", INSTANTANEA_ID))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$").isArray())
             .andExpect(jsonPath("$").isEmpty());
+    }
 
+    @Test
+    @Order(5)
+    void crearGastos(CapturedOutput capturedOutput) throws Exception {
         // Llamada a createExpense: gasto de 20 para el día 2
         mockMvc.perform(post("/expenses")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -118,10 +140,10 @@ class GastoIT extends AbstractIntegrationIT {
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.amount").value(5.0));
 
-        // Llamada a createExpense: gasto de 6.23 para el día 13 (creamos un segundo gasto para el dia 13)
+        // Llamada a createExpense: gasto de 6.23 para el día 13
         mockMvc.perform(post("/expenses")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
                     {
                       "snapshotId": "%s",
                       "category": "ocio",
@@ -129,20 +151,30 @@ class GastoIT extends AbstractIntegrationIT {
                       "date": "2026-07-13"
                     }
                     """.formatted(INSTANTANEA_ID)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.amount").value(6.23));
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.amount").value(6.23));
 
         // Comprobar que la instantánea tiene gastos totales de 31.23
         Float gastosTotal = jdbcTemplate.queryForObject(
             "SELECT gastos FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
             Float.class, CUENTA_ID, 2026, 7);
         assertThat(gastosTotal).isEqualTo(31.23f);
+    }
 
-        // Listar gastos de la instantánea (debe devolver 3 registros)
-        String listaResponse = mockMvc.perform(get("/expenses").param("snapshotId", INSTANTANEA_ID))
+    @Test
+    @Order(6)
+    void listarGastos(CapturedOutput capturedOutput) throws Exception {
+        mockMvc.perform(get("/expenses").param("snapshotId", INSTANTANEA_ID))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$").isArray())
-            .andExpect(jsonPath("$.length()").value(3))
+            .andExpect(jsonPath("$.length()").value(3));
+    }
+
+    @Test
+    @Order(7)
+    void editarGasto(CapturedOutput capturedOutput) throws Exception {
+        String listaResponse = mockMvc.perform(get("/expenses").param("snapshotId", INSTANTANEA_ID))
+            .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
 
         String primerGastoId = JsonPath.read(listaResponse, "$[0].id");
@@ -178,9 +210,19 @@ class GastoIT extends AbstractIntegrationIT {
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM operaciones_inversion", Integer.class)).isZero();
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM inversiones_crowdlending", Integer.class)).isZero();
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM nomina", Integer.class)).isZero();
+    }
 
-        // Eliminar el primer gasto (25.0) y comprobar que la instantánea se recalcula
-        mockMvc.perform(delete("/expenses/{id}", primerGastoId).param("snapshotId", INSTANTANEA_ID))
+    @Test
+    @Order(8)
+    void eliminarGasto(CapturedOutput capturedOutput) throws Exception {
+        String listaResponse = mockMvc.perform(get("/expenses").param("snapshotId", INSTANTANEA_ID))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
+        List<String> ids = JsonPath.read(listaResponse, "$[?(@.amount == 25.0)].id");
+        String gastoEditadoId = ids.get(0);
+
+        mockMvc.perform(delete("/expenses/{id}", gastoEditadoId).param("snapshotId", INSTANTANEA_ID))
             .andExpect(status().isNoContent());
 
         // Comprobar que la instantánea se ha recalculado: 5 + 6.23 = 11.23
