@@ -3,6 +3,7 @@ package com.centimo.api.ports.driving;
 import com.centimo.api.domain.models.InstantaneaMensual;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +18,6 @@ public interface InstantaneaDrivingPort {
 
     @Transactional
     InstantaneaMensual upsert(String accountId, Integer year, Integer month,
-                              java.math.BigDecimal balance, java.math.BigDecimal incomeDelta,
-                              java.math.BigDecimal expenses, java.math.BigDecimal contribution);
+                              BigDecimal balance, BigDecimal incomeDelta,
+                              BigDecimal expenses, BigDecimal contribution);
 }
