@@ -37,6 +37,14 @@ public class InstantaneaMensualDatasourceAdapter implements InstantaneaDrivenPor
     }
 
     @Override
+    public List<InstantaneaMensual> findByMes(Integer anio, Integer mes) {
+        return instantaneaRepository.findByAnioAndMes(anio, mes)
+                .stream()
+                .map(mapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public List<InstantaneaMensual> findAll() {
         return instantaneaRepository.findAll()
                 .stream()

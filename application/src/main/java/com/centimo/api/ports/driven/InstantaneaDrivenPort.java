@@ -10,6 +10,8 @@ public interface InstantaneaDrivenPort {
 
   Optional<InstantaneaMensual> findByAnioAndMes(String accountId, Integer anio, Integer mes);
 
+  List<InstantaneaMensual> findByMes(Integer anio, Integer mes);
+
   Optional<InstantaneaMensual> findByCompositeKey(String compositeKey);
 
   List<InstantaneaMensual> findAll();
