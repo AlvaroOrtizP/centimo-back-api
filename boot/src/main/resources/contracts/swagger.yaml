@@ -764,6 +764,25 @@ paths:
   /expenses/{id}:
     parameters:
       - $ref: '#/components/parameters/ExpenseId'
+    put:
+      tags: [Expenses]
+      operationId: updateExpense
+      summary: Actualizar gasto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseUpdate'
+      responses:
+        '200':
+          description: Actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Expense'
+        '404':
+          $ref: '#/components/responses/NotFound'
     delete:
       tags: [Expenses]
       operationId: deleteExpense
@@ -1903,6 +1922,23 @@ components:
     ExpenseCreate:
       type: object
       required: [snapshotId, category, amount, date]
+      properties:
+        snapshotId:
+          type: string
+        category:
+          $ref: '#/components/schemas/ExpenseCategory'
+        amount:
+          type: number
+          format: float
+        date:
+          type: string
+          format: date
+        description:
+          type: string
+          nullable: true
+
+    ExpenseUpdate:
+      type: object
       properties:
         snapshotId:
           type: string

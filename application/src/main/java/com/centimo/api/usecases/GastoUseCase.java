@@ -37,6 +37,31 @@ public class GastoUseCase implements GastoDrivingPort {
 
     @Transactional
     @Override
+    public Gasto actualizar(String id, Gasto gasto) {
+        Gasto existente = gastoDrivenPort.findById(id).orElseThrow();
+
+        instantaneaDrivenPort.findByCompositeKey(existente.getInstantaneaId()).ifPresent(instantanea -> {
+            instantanea.setGastos(instantanea.getGastos().subtract(existente.getCantidad()));
+            instantaneaDrivenPort.guardar(instantanea);
+        });
+
+        existente.setCategoria(gasto.getCategoria());
+        existente.setCantidad(gasto.getCantidad());
+        existente.setFecha(gasto.getFecha());
+        existente.setDescripcion(gasto.getDescripcion());
+
+        Gasto gastoActualizado = gastoDrivenPort.guardar(existente);
+
+        instantaneaDrivenPort.findByCompositeKey(gastoActualizado.getInstantaneaId()).ifPresent(instantanea -> {
+            instantanea.setGastos(instantanea.getGastos().add(gastoActualizado.getCantidad()));
+            instantaneaDrivenPort.guardar(instantanea);
+        });
+
+        return gastoActualizado;
+    }
+
+    @Transactional
+    @Override
     public void eliminar(String id, String instantaneaId) {
         gastoDrivenPort.findById(id).ifPresent(gasto -> {
             instantaneaDrivenPort.findByCompositeKey(instantaneaId).ifPresent(instantanea -> {

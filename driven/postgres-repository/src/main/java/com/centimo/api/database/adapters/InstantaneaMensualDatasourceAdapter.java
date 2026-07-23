@@ -46,11 +46,21 @@ public class InstantaneaMensualDatasourceAdapter implements InstantaneaDrivenPor
 
     @Override
     public InstantaneaMensual guardar(InstantaneaMensual instantanea) {
-        InstantaneaMensualMO entity = mapper.toEntity(instantanea);
+        InstantaneaMensualMO entity = instantanea.getId() != null
+                ? instantaneaRepository.findById(instantanea.getId()).orElse(mapper.toEntity(instantanea))
+                : mapper.toEntity(instantanea);
 
         if (entity.getId() == null) {
             entity.setId(UUID.randomUUID().toString());
         }
+
+        entity.setAnio(instantanea.getAnio());
+        entity.setMes(instantanea.getMes());
+        entity.setSaldo(instantanea.getSaldo());
+        entity.setIngresos(instantanea.getIngresos());
+        entity.setGastos(instantanea.getGastos());
+        entity.setAportacion(instantanea.getAportacion());
+        entity.setNotas(instantanea.getNotas());
 
         cuentaDrivenPort.findById(instantanea.getCuentaId())
                 .ifPresent(cuenta -> entity.setCuenta(cuentaMapper.toMO(cuenta)));
@@ -66,7 +76,7 @@ public class InstantaneaMensualDatasourceAdapter implements InstantaneaDrivenPor
         }
         String[] parts = compositeKey.split("-");
         if (parts.length < 3) {
-            return Optional.empty();
+            return instantaneaRepository.findById(compositeKey).map(mapper::toDomain);
         }
         String monthStr = parts[parts.length - 1];
         String yearStr = parts[parts.length - 2];
@@ -76,7 +86,7 @@ public class InstantaneaMensualDatasourceAdapter implements InstantaneaDrivenPor
             int month = Integer.parseInt(monthStr);
             return findByAnioAndMes(accountId, year, month);
         } catch (NumberFormatException e) {
-            return Optional.empty();
+            return instantaneaRepository.findById(compositeKey).map(mapper::toDomain);
         }
     }
 }

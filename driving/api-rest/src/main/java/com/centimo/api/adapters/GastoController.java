@@ -4,6 +4,7 @@ import com.centimo.api.ExpensesApi;
 import com.centimo.api.domain.models.Gasto;
 import com.centimo.api.dto.Expense;
 import com.centimo.api.dto.ExpenseCreate;
+import com.centimo.api.dto.ExpenseUpdate;
 import com.centimo.api.mappers.GastoApiMapper;
 import com.centimo.api.ports.driving.GastoDrivingPort;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,15 @@ public class GastoController implements ExpensesApi {
         Gasto modeloCreado = gastoDrivingPort.crear(modeloEntrada);
         Expense response = mapper.toExpense(modeloCreado);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Override
+    public ResponseEntity<Expense> updateExpense(String id, ExpenseUpdate expenseUpdate) {
+        log.info("updateExpense id={}", id);
+        Gasto modeloEntrada = mapper.toDomain(expenseUpdate);
+        Gasto modeloActualizado = gastoDrivingPort.actualizar(id, modeloEntrada);
+        Expense response = mapper.toExpense(modeloActualizado);
+        return ResponseEntity.ok(response);
     }
 
     @Override

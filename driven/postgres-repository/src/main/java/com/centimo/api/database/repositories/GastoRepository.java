@@ -2,9 +2,16 @@ package com.centimo.api.database.repositories;
 
 import com.centimo.api.database.models.GastoMO;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
 public interface GastoRepository extends JpaRepository<GastoMO, String> {
-  List<GastoMO> findByInstantaneaId(String instantaneaId);
+
+  @Query(value = "SELECT g.* FROM gastos g WHERE g.instantanea_id = :instantaneaId", nativeQuery = true)
+  List<GastoMO> findByInstantaneaId(@Param("instantaneaId") String instantaneaId);
+
+  @Query(value = "SELECT g.* FROM gastos g WHERE g.instantanea_id = :instantaneaId AND g.categoria = :categoria", nativeQuery = true)
+  List<GastoMO> findByInstantaneaIdAndCategoria(@Param("instantaneaId") String instantaneaId, @Param("categoria") String categoria);
 }

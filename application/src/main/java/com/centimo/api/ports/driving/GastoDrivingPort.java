@@ -13,5 +13,8 @@ public interface GastoDrivingPort {
   Gasto crear(Gasto gasto);
 
   @Transactional
+  Gasto actualizar(String id, Gasto gasto);
+
+  @Transactional
   void eliminar(String id, String instantaneaId);
 }

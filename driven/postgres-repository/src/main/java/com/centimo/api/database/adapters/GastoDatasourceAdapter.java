@@ -40,10 +40,16 @@ public class GastoDatasourceAdapter implements GastoDrivenPort {
 
     @Override
     public Gasto guardar(Gasto gasto) {
-        GastoMO entity = mapper.toEntity(gasto);
+        GastoMO entity = gasto.getId() != null
+                ? gastoRepository.findById(gasto.getId()).orElse(mapper.toEntity(gasto))
+                : mapper.toEntity(gasto);
         if (entity.getId() == null) {
             entity.setId(UUID.randomUUID().toString());
         }
+        entity.setCategoria(gasto.getCategoria());
+        entity.setCantidad(gasto.getCantidad());
+        entity.setFecha(gasto.getFecha());
+        entity.setDescripcion(gasto.getDescripcion());
 
         resolveInstantanea(gasto.getInstantaneaId()).ifPresent(entity::setInstantanea);
 
