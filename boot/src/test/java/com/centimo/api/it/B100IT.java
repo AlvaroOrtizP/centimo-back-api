@@ -68,7 +68,8 @@ class B100IT extends AbstractIntegrationIT {
                       "month": 7,
                       "balance": 1500.00,
                       "incomeDelta": 0,
-                      "expenses": 0
+                      "expenses": 200.00,
+                      "contribution": 300.00
                     }
                     """.formatted(SAVE_CUENTA_ID)))
             .andExpect(status().isOk())
@@ -92,7 +93,8 @@ class B100IT extends AbstractIntegrationIT {
                       "month": 7,
                       "balance": 800.00,
                       "incomeDelta": 0,
-                      "expenses": 0
+                      "expenses": 50.00,
+                      "contribution": 100.00
                     }
                     """.formatted(HEAL_CUENTA_ID)))
             .andExpect(status().isOk())
@@ -128,6 +130,26 @@ class B100IT extends AbstractIntegrationIT {
             "SELECT saldo FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
             Float.class, HEAL_CUENTA_ID, 2026, 7);
         assertThat(healBalance).isEqualTo(800.00f);
+
+        Float saveGastos = jdbcTemplate.queryForObject(
+            "SELECT gastos FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
+            Float.class, SAVE_CUENTA_ID, 2026, 7);
+        assertThat(saveGastos).isEqualTo(200.00f);
+
+        Float saveAportacion = jdbcTemplate.queryForObject(
+            "SELECT aportacion FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
+            Float.class, SAVE_CUENTA_ID, 2026, 7);
+        assertThat(saveAportacion).isEqualTo(300.00f);
+
+        Float healGastos = jdbcTemplate.queryForObject(
+            "SELECT gastos FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
+            Float.class, HEAL_CUENTA_ID, 2026, 7);
+        assertThat(healGastos).isEqualTo(50.00f);
+
+        Float healAportacion = jdbcTemplate.queryForObject(
+            "SELECT aportacion FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
+            Float.class, HEAL_CUENTA_ID, 2026, 7);
+        assertThat(healAportacion).isEqualTo(100.00f);
     }
 
     @Test
@@ -142,7 +164,8 @@ class B100IT extends AbstractIntegrationIT {
                       "month": 7,
                       "balance": 1800.00,
                       "incomeDelta": 0,
-                      "expenses": 50.00
+                      "expenses": 250.00,
+                      "contribution": 350.00
                     }
                     """.formatted(SAVE_CUENTA_ID)))
             .andExpect(status().isOk())
@@ -157,7 +180,8 @@ class B100IT extends AbstractIntegrationIT {
                       "month": 7,
                       "balance": 950.00,
                       "incomeDelta": 0,
-                      "expenses": 25.00
+                      "expenses": 75.00,
+                      "contribution": 150.00
                     }
                     """.formatted(HEAL_CUENTA_ID)))
             .andExpect(status().isOk())
@@ -190,6 +214,26 @@ class B100IT extends AbstractIntegrationIT {
             "SELECT ingresos FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
             Float.class, HEAL_CUENTA_ID, 2026, 7);
         assertThat(healIngresos).isEqualTo(0f);
+
+        Float saveGastos = jdbcTemplate.queryForObject(
+            "SELECT gastos FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
+            Float.class, SAVE_CUENTA_ID, 2026, 7);
+        assertThat(saveGastos).isEqualTo(250.00f);
+
+        Float saveAportacion = jdbcTemplate.queryForObject(
+            "SELECT aportacion FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
+            Float.class, SAVE_CUENTA_ID, 2026, 7);
+        assertThat(saveAportacion).isEqualTo(350.00f);
+
+        Float healGastos = jdbcTemplate.queryForObject(
+            "SELECT gastos FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
+            Float.class, HEAL_CUENTA_ID, 2026, 7);
+        assertThat(healGastos).isEqualTo(75.00f);
+
+        Float healAportacion = jdbcTemplate.queryForObject(
+            "SELECT aportacion FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
+            Float.class, HEAL_CUENTA_ID, 2026, 7);
+        assertThat(healAportacion).isEqualTo(150.00f);
     }
 
     @Test
