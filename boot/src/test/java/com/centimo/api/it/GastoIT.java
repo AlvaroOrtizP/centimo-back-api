@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -166,7 +167,7 @@ class GastoIT extends AbstractIntegrationIT {
             Float.class, CUENTA_ID, 2026, 7);
         assertThat(gastosAfterEdit).isEqualTo(36.23f);
 
-        // Comprobar que hay 2 registros en gastos y 1 en instantanea
+        // Comprobar que hay 3 registros en gastos y 1 en instantanea
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM gastos", Integer.class)).isEqualTo(3);
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM instantaneas_mensuales", Integer.class)).isOne();
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM plataformas", Integer.class)).isOne();
@@ -177,7 +178,24 @@ class GastoIT extends AbstractIntegrationIT {
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM operaciones_inversion", Integer.class)).isZero();
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM inversiones_crowdlending", Integer.class)).isZero();
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM nomina", Integer.class)).isZero();
-    }
 
-    //TODO falta probar eliminar
+        // Eliminar el primer gasto (25.0) y comprobar que la instantánea se recalcula
+        mockMvc.perform(delete("/expenses/{id}", primerGastoId).param("snapshotId", INSTANTANEA_ID))
+            .andExpect(status().isNoContent());
+
+        // Comprobar que la instantánea se ha recalculado: 5 + 6.23 = 11.23
+        Float gastosAfterDelete = jdbcTemplate.queryForObject(
+            "SELECT gastos FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
+            Float.class, CUENTA_ID, 2026, 7);
+        assertThat(gastosAfterDelete).isEqualTo(11.23f);
+
+        // Listar gastos de la instantánea (debe devolver 2 registros)
+        mockMvc.perform(get("/expenses").param("snapshotId", INSTANTANEA_ID))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$").isArray())
+            .andExpect(jsonPath("$.length()").value(2));
+
+        // Comprobar que hay 2 registros en gastos
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM gastos", Integer.class)).isEqualTo(2);
+    }
 }
