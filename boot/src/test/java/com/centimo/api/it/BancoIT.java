@@ -184,20 +184,20 @@ class BancoIT extends AbstractIntegrationIT {
             Float.class, CAIXA_CUENTA_ID, 2026, 7);
         assertThat(caixaBalance).isEqualTo(3500.00f);
 
-        Float caixaGastos = jdbcTemplate.queryForObject(
-            "SELECT gastos FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
+        Float caixaIngresos = jdbcTemplate.queryForObject(
+            "SELECT ingresos FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
             Float.class, CAIXA_CUENTA_ID, 2026, 7);
-        assertThat(caixaGastos).isEqualTo(100.00f);
+        assertThat(caixaIngresos).isEqualTo(1800.00f);
 
         Float bbvaBalance = jdbcTemplate.queryForObject(
             "SELECT saldo FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
             Float.class, BBVA_CUENTA_ID, 2026, 7);
         assertThat(bbvaBalance).isEqualTo(4800.00f);
 
-        Float bbvaGastos = jdbcTemplate.queryForObject(
-            "SELECT gastos FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
+        Float bbvaIngresos = jdbcTemplate.queryForObject(
+            "SELECT ingresos FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
             Float.class, BBVA_CUENTA_ID, 2026, 7);
-        assertThat(bbvaGastos).isEqualTo(200.00f);
+        assertThat(bbvaIngresos).isEqualTo(2200.00f);
 
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM gastos", Integer.class)).isZero();
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM posiciones_inversion", Integer.class)).isZero();
