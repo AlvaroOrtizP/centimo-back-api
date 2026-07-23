@@ -7,8 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 @Builder
@@ -22,6 +20,4 @@ public class Cuenta {
   private TipoCuenta tipo;
   private String moneda;
   private Integer orden;
-  private LocalDateTime fechaCreacion;
-  private LocalDateTime fechaActualizacion;
 }

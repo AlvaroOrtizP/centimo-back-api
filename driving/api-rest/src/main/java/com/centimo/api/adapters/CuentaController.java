@@ -1,67 +1,31 @@
 package com.centimo.api.adapters;
 
-import com.centimo.api.domain.models.Cuenta;
-import com.centimo.api.dto.CreateCuentaRequest;
-import com.centimo.api.dto.CuentaDto;
-import com.centimo.api.dto.UpdateCuentaRequest;
+import com.centimo.api.AccountsApi;
+import com.centimo.api.dto.Account;
 import com.centimo.api.mappers.CuentaApiMapper;
 import com.centimo.api.ports.driving.CuentaDrivingPort;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/cuentas")
 @RequiredArgsConstructor
-public class CuentaController {
+@Slf4j
+public class CuentaController implements AccountsApi {
 
-  private final CuentaDrivingPort cuentaDrivingPort;
-  private final CuentaApiMapper mapper;
+    private final CuentaDrivingPort cuentaDrivingPort;
+    private final CuentaApiMapper mapper;
 
-  /**
-   * Pantallas: Dashboard, MonthlyView, Trends, TradeLog, EntryForm, Income, PlatformDetail.
-   * Carga inicial en FinancialDataService.ngOnInit() vía GET /cuentas.
-   */
-  @GetMapping
-  public ResponseEntity<List<CuentaDto>> buscarTodas(
-      @RequestParam(required = false) String plataformaId) {
-    List<CuentaDto> dtos = cuentaDrivingPort.buscarTodas(plataformaId).stream()
-      .map(mapper::toDto)
-      .toList();
-    return ResponseEntity.ok(dtos);
-  }
-
-  /** No se usa actualmente en el frontend. */
-  @GetMapping("/{id}")
-  public ResponseEntity<CuentaDto> buscarPorId(@PathVariable String id) {
-    Cuenta cuenta = cuentaDrivingPort.buscarPorId(id);
-    return ResponseEntity.ok(mapper.toDto(cuenta));
-  }
-
-  /** No se usa actualmente en el frontend. */
-  @PostMapping
-  public ResponseEntity<CuentaDto> crear(@Valid @RequestBody CreateCuentaRequest request) {
-    Cuenta cuenta = cuentaDrivingPort.crear(mapper.toDomain(request));
-    return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toDto(cuenta));
-  }
-
-  /** No se usa actualmente en el frontend. */
-  @PutMapping("/{id}")
-  public ResponseEntity<CuentaDto> actualizar(
-      @PathVariable String id,
-      @Valid @RequestBody UpdateCuentaRequest request) {
-    Cuenta cuenta = cuentaDrivingPort.actualizar(id, mapper.toDomain(request));
-    return ResponseEntity.ok(mapper.toDto(cuenta));
-  }
-
-  /** No se usa actualmente en el frontend. */
-  @DeleteMapping("/{id}")
-  public ResponseEntity<Void> eliminar(@PathVariable String id) {
-    cuentaDrivingPort.eliminar(id);
-    return ResponseEntity.noContent().build();
-  }
+    @Override
+    public ResponseEntity<List<Account>> listAccounts(String platformId) {
+        log.info("listAccounts platformId={}", platformId);
+        List<Account> cuentas = cuentaDrivingPort.listar(platformId)
+                .stream()
+                .map(mapper::toAccount)
+                .toList();
+        return ResponseEntity.ok(cuentas);
+    }
 }

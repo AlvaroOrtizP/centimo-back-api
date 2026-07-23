@@ -12,8 +12,4 @@ public interface CuentaDrivenPort {
   List<Cuenta> findByPlataformaId(String plataformaId);
 
   Optional<Cuenta> findById(String id);
-
-  Cuenta save(Cuenta cuenta);
-
-  void deleteById(String id);
 }
