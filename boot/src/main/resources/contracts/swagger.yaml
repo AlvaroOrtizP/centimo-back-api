@@ -1885,6 +1885,11 @@ components:
           type: number
           format: float
           description: Gastos del mes (opcional)
+        contribution:
+          type: number
+          format: float
+          description: Aportación del mes (opcional)
+          nullable: true
 
     ChecklistItem:
       type: object

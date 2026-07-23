@@ -36,7 +36,8 @@ public class InstantaneaUseCase implements InstantaneaDrivingPort {
   @Transactional
   @Override
   public InstantaneaMensual upsert(String accountId, Integer year, Integer month,
-                                   BigDecimal balance, BigDecimal incomeDelta, BigDecimal expenses) {
+                                   BigDecimal balance, BigDecimal incomeDelta, BigDecimal expenses,
+                                   BigDecimal contribution) {
     Optional<InstantaneaMensual> existente = instantaneaDrivenPort.findByAnioAndMes(accountId, year, month);
 
     if (existente.isPresent()) {
@@ -45,6 +46,9 @@ public class InstantaneaUseCase implements InstantaneaDrivingPort {
       instantanea.setIngresos(instantanea.getIngresos().add(incomeDelta));
       if (expenses != null) {
         instantanea.setGastos(expenses);
+      }
+      if (contribution != null) {
+        instantanea.setAportacion(contribution);
       }
       return instantaneaDrivenPort.guardar(instantanea);
     }
@@ -56,6 +60,7 @@ public class InstantaneaUseCase implements InstantaneaDrivingPort {
         .saldo(balance)
         .ingresos(incomeDelta)
         .gastos(expenses != null ? expenses : BigDecimal.ZERO)
+        .aportacion(contribution)
         .build();
     return instantaneaDrivenPort.guardar(nueva);
   }

@@ -77,7 +77,8 @@ ingresos y tareas.
                 snapshotUpsert.getMonth(),
                 BigDecimal.valueOf(snapshotUpsert.getBalance()),
                 BigDecimal.valueOf(snapshotUpsert.getIncomeDelta()),
-                snapshotUpsert.getExpenses() != null ? BigDecimal.valueOf(snapshotUpsert.getExpenses()) : null);
+                snapshotUpsert.getExpenses() != null ? BigDecimal.valueOf(snapshotUpsert.getExpenses()) : null,
+                snapshotUpsert.getContribution() != null ? BigDecimal.valueOf(snapshotUpsert.getContribution()) : null);
         SnapshotResponse response = mapper.toSnapshotResponse(resultado);
         return ResponseEntity.ok(response);
     }

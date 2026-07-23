@@ -18,5 +18,5 @@ public interface InstantaneaDrivingPort {
     @Transactional
     InstantaneaMensual upsert(String accountId, Integer year, Integer month,
                               java.math.BigDecimal balance, java.math.BigDecimal incomeDelta,
-                              java.math.BigDecimal expenses);
+                              java.math.BigDecimal expenses, java.math.BigDecimal contribution);
 }
