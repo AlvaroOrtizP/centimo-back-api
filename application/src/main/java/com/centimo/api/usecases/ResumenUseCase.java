@@ -32,13 +32,17 @@ public class ResumenUseCase implements SummariesDrivingPort {
                 .map(InstantaneaMensual::getGastos)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        // Los gastos se registran en la columna `gastos` de cuentas con saldo 0;
+        // no deben descontarse del saldo real.
+        BigDecimal balanceWithoutExpenses = totalBalance;
+
         return ResumenMensual.builder()
                 .year(year)
                 .month(month)
                 .totalBalance(totalBalance)
                 .totalIncome(totalIncome)
                 .totalExpenses(totalExpenses)
-                .balanceWithoutExpenses(totalBalance.subtract(totalExpenses))
+                .balanceWithoutExpenses(balanceWithoutExpenses)
                 .netWorth(totalBalance)
                 .netSavings(totalIncome.subtract(totalExpenses))
                 .build();
