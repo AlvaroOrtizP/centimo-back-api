@@ -2,6 +2,7 @@ package com.centimo.api.mappers;
 
 import com.centimo.api.domain.models.Gasto;
 import com.centimo.api.dto.Expense;
+import com.centimo.api.dto.ExpenseCategory;
 import com.centimo.api.dto.ExpenseCreate;
 import com.centimo.api.dto.ExpenseUpdate;
 import org.mapstruct.Mapper;
@@ -35,4 +36,12 @@ public interface GastoApiMapper {
   @Mapping(target = "descripcion", source = "description")
   @Mapping(target = "fechaCreacion", ignore = true)
   Gasto toDomain(ExpenseUpdate expense);
+
+  default ExpenseCategory toExpenseCategory(String categoria) {
+    return ExpenseCategory.fromValue(categoria);
+  }
+
+  default String fromExpenseCategory(ExpenseCategory categoria) {
+    return categoria.getValue();
+  }
 }

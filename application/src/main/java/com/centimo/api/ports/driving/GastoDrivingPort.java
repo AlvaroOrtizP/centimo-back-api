@@ -9,6 +9,8 @@ public interface GastoDrivingPort {
 
   List<Gasto> listarPorInstantanea(String instantaneaId);
 
+  List<Gasto> listarPorPeriodo(int year, int month);
+
   @Transactional
   Gasto crear(Gasto gasto);
 

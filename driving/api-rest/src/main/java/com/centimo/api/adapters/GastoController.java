@@ -24,12 +24,22 @@ public class GastoController implements ExpensesApi {
     private final GastoApiMapper mapper;
 
     @Override
-    public ResponseEntity<List<Expense>> listExpenses(String snapshotId) {
-        log.info("listExpenses snapshotId={}", snapshotId);
-        List<Expense> gastos = gastoDrivingPort.listarPorInstantanea(snapshotId)
-                .stream()
-                .map(mapper::toExpense)
-                .toList();
+    public ResponseEntity<List<Expense>> listExpenses(String snapshotId, Integer year, Integer month) {
+        log.info("listExpenses snapshotId={} year={} month={}", snapshotId, year, month);
+        List<Expense> gastos;
+        if (snapshotId != null && !snapshotId.isBlank()) {
+            gastos = gastoDrivingPort.listarPorInstantanea(snapshotId)
+                    .stream()
+                    .map(mapper::toExpense)
+                    .toList();
+        } else if (year != null && month != null) {
+            gastos = gastoDrivingPort.listarPorPeriodo(year, month)
+                    .stream()
+                    .map(mapper::toExpense)
+                    .toList();
+        } else {
+            gastos = List.of();
+        }
         return ResponseEntity.ok(gastos);
     }
 

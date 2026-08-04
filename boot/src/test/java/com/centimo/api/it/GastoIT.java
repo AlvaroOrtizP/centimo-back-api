@@ -118,7 +118,7 @@ class GastoIT extends AbstractIntegrationIT {
                 .content("""
                     {
                       "snapshotId": "%s",
-                      "category": "comida",
+                      "category": "Comida",
                       "amount": 20.0,
                       "date": "2026-07-02"
                     }
@@ -132,7 +132,7 @@ class GastoIT extends AbstractIntegrationIT {
                 .content("""
                     {
                       "snapshotId": "%s",
-                      "category": "ocio",
+                      "category": "Ocio",
                       "amount": 5.0,
                       "date": "2026-07-13"
                     }
@@ -146,7 +146,7 @@ class GastoIT extends AbstractIntegrationIT {
                 .content("""
                     {
                       "snapshotId": "%s",
-                      "category": "ocio",
+                      "category": "Ocio",
                       "amount": 6.23,
                       "date": "2026-07-13"
                     }
@@ -184,7 +184,7 @@ class GastoIT extends AbstractIntegrationIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
-                      "category": "comida",
+                      "category": "Comida",
                       "amount": 25.0,
                       "date": "2026-07-02"
                     }
@@ -239,5 +239,21 @@ class GastoIT extends AbstractIntegrationIT {
 
         // Comprobar que hay 2 registros en gastos
         assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM gastos", Integer.class)).isEqualTo(2);
+    }
+
+    @Test
+    @Order(9)
+    void listarGastosPorPeriodo(CapturedOutput capturedOutput) throws Exception {
+        // El periodo 2026/7 conserva los 2 gastos restantes tras la eliminación
+        mockMvc.perform(get("/expenses").param("year", "2026").param("month", "7"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$").isArray())
+            .andExpect(jsonPath("$.length()").value(2));
+
+        // Periodo sin instantáneas ni gastos
+        mockMvc.perform(get("/expenses").param("year", "2025").param("month", "1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$").isArray())
+            .andExpect(jsonPath("$").isEmpty());
     }
 }
