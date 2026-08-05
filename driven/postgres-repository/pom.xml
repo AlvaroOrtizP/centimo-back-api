@@ -6,6 +6,7 @@
 		<groupId>com.centimo</groupId>
 		<artifactId>centimo-back-api</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../../pom.xml</relativePath>
 	</parent>
 	<artifactId>centimo-driven-postgres-repository</artifactId>
 	<name>centimo-driven-postgres-repository</name>

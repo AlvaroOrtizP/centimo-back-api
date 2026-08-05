@@ -1,6 +1,7 @@
 package com.centimo.api.usecases;
 
 import com.centimo.api.domain.models.Gasto;
+import com.centimo.api.domain.models.InstantaneaMensual;
 import com.centimo.api.ports.driven.GastoDrivenPort;
 import com.centimo.api.ports.driven.InstantaneaDrivenPort;
 import com.centimo.api.ports.driving.GastoDrivingPort;
@@ -8,7 +9,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +34,8 @@ public class GastoUseCase implements GastoDrivingPort {
     @Transactional
     @Override
     public Gasto crear(Gasto gasto) {
+        resolveInstantaneaForExpense(gasto);
+
         Gasto gastoCreado = gastoDrivenPort.guardar(gasto);
 
         instantaneaDrivenPort.findByCompositeKey(gasto.getInstantaneaId()).ifPresent(instantanea -> {
@@ -38,6 +44,48 @@ public class GastoUseCase implements GastoDrivingPort {
         });
 
         return gastoCreado;
+    }
+
+    private void resolveInstantaneaForExpense(Gasto gasto) {
+        String instantaneaId = gasto.getInstantaneaId();
+        if (instantaneaId == null || instantaneaId.isBlank() || gasto.getFecha() == null) return;
+
+        String accountId = extractAccountIdFromCompositeKey(instantaneaId);
+        if (accountId == null) {
+            Optional<InstantaneaMensual> snap = instantaneaDrivenPort.findById(instantaneaId);
+            if (snap.isEmpty()) return;
+            accountId = snap.get().getCuentaId();
+        }
+
+        int year = gasto.getFecha().getYear();
+        int month = gasto.getFecha().getMonthValue();
+
+        Optional<InstantaneaMensual> existente = instantaneaDrivenPort.findByAnioAndMes(accountId, year, month);
+        if (existente.isEmpty()) {
+            InstantaneaMensual nueva = InstantaneaMensual.builder()
+                .cuentaId(accountId)
+                .anio(year)
+                .mes(month)
+                .saldo(BigDecimal.ZERO)
+                .ingresos(BigDecimal.ZERO)
+                .gastos(BigDecimal.ZERO)
+                .build();
+            instantaneaDrivenPort.guardar(nueva);
+        }
+
+        gasto.setInstantaneaId(accountId + "-" + year + "-" + month);
+    }
+
+    private String extractAccountIdFromCompositeKey(String id) {
+        String[] parts = id.split("-");
+        if (parts.length >= 3) {
+            try {
+                Integer.parseInt(parts[parts.length - 1]);
+                Integer.parseInt(parts[parts.length - 2]);
+                return String.join("-", Arrays.copyOfRange(parts, 0, parts.length - 2));
+            } catch (NumberFormatException ignored) {}
+        }
+        return null;
     }
 
     @Transactional
