@@ -9,6 +9,8 @@ public interface GastoDrivenPort {
 
   List<Gasto> findByInstantaneaId(String instantaneaId);
 
+  List<Gasto> findByAnioYMes(int year, int month);
+
   Optional<Gasto> findById(String id);
 
   Gasto guardar(Gasto gasto);

@@ -26,6 +26,11 @@ public class GastoUseCase implements GastoDrivingPort {
         return gastoDrivenPort.findByInstantaneaId(instantaneaId);
     }
 
+    @Override
+    public List<Gasto> listarPorPeriodo(int year, int month) {
+        return gastoDrivenPort.findByAnioYMes(year, month);
+    }
+
     @Transactional
     @Override
     public Gasto crear(Gasto gasto) {

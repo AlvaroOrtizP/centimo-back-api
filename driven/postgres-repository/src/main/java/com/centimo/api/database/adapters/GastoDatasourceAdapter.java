@@ -34,6 +34,19 @@ public class GastoDatasourceAdapter implements GastoDrivenPort {
     }
 
     @Override
+    public List<Gasto> findByAnioYMes(int year, int month) {
+        List<String> instantaneaIds = instantaneaRepository.findByAnioAndMes(year, month).stream()
+                .map(InstantaneaMensualMO::getId)
+                .toList();
+        if (instantaneaIds.isEmpty()) {
+            return List.of();
+        }
+        return gastoRepository.findByInstantaneaIds(instantaneaIds).stream()
+                .map(mapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public Optional<Gasto> findById(String id) {
         return gastoRepository.findById(id).map(mapper::toDomain);
     }

@@ -17,4 +17,9 @@ Thumbs.db
 # Logs
 *.log
 /.env
+
+/application/.factorypath
+/boot/.factorypath
+/driven/postgres-repository/.factorypath
+/driving/api-rest/.factorypath
 /NUL
