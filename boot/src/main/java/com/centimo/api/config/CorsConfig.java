@@ -16,7 +16,8 @@ public class CorsConfig {
                 registry.addMapping("/**") // Aplica CORS a todas las rutas de la API
                         .allowedOrigins(
                                 "http://localhost:4200", // Puerto por defecto del Angular CLI en desarrollo
-                                "http://localhost:80"    // Opcional: si ejecutas Angular en Docker/Nginx local
+                                "http://localhost:80",   // Opcional: si ejecutas Angular en Docker/Nginx local
+                                "https://centimo-web.onrender.com" // Web desplegada en Render
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS") // Métodos HTTP permitidos
                         .allowedHeaders("*") // Permite cualquier cabecera (Content-Type, Authorization, etc.)
