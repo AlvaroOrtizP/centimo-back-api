@@ -8,6 +8,4 @@ import org.mapstruct.Mapper;
 public interface PlataformaDatasourceMapper {
 
     Plataforma toDomain(PlataformaMO mo);
-
-    PlataformaMO toEntity(Plataforma plataforma);
 }

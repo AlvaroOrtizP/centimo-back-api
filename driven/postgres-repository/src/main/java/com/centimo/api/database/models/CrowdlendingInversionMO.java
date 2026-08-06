@@ -1,6 +1,5 @@
 package com.centimo.api.database.models;
 
-import com.centimo.api.domain.enums.EstadoProyecto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,7 +14,7 @@ import java.time.LocalDateTime;
 @Table(name = "inversiones_crowdlending")
 @Getter
 @Setter
-public class InversionCrowdlendingMO {
+public class CrowdlendingInversionMO {
 
   @Id
   @Column(length = 50)
@@ -50,11 +49,10 @@ public class InversionCrowdlendingMO {
   private BigDecimal retornoMensual;
 
   @Column(name = "total_devuelto", nullable = false, precision = 10, scale = 2)
-  private BigDecimal totalDevuelto;
+  private BigDecimal totalDevuelto = BigDecimal.ZERO;
 
-  @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 20)
-  private EstadoProyecto estado;
+  private String estado;
 
   @CreationTimestamp
   @Column(name = "fecha_creacion", updatable = false)

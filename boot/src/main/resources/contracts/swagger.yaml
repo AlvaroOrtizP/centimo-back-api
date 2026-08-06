@@ -1091,6 +1091,27 @@ paths:
   /crowdlending/{id}:
     parameters:
       - $ref: '#/components/parameters/CrowdlendingId'
+    put:
+      tags: [Crowdlending]
+      operationId: updateCrowdlending
+      summary: Actualizar inversión crowdlending
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CrowdlendingInvestmentCreate'
+      responses:
+        '200':
+          description: Actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CrowdlendingInvestment'
+        '400':
+          description: Error generico 400
+        '404':
+          $ref: '#/components/responses/NotFound'
     delete:
       tags: [Crowdlending]
       operationId: deleteCrowdlending
@@ -2265,6 +2286,15 @@ components:
         balance:
           type: number
           format: float
+        income:
+          type: number
+          format: float
+        contribution:
+          type: number
+          format: float
+        expenses:
+          type: number
+          format: float
 
     FundBalanceCreate:
       type: object
@@ -2279,11 +2309,29 @@ components:
         balance:
           type: number
           format: float
+        income:
+          type: number
+          format: float
+        contribution:
+          type: number
+          format: float
+        expenses:
+          type: number
+          format: float
 
     FundBalanceUpdate:
       type: object
       properties:
         balance:
+          type: number
+          format: float
+        income:
+          type: number
+          format: float
+        contribution:
+          type: number
+          format: float
+        expenses:
           type: number
           format: float
 

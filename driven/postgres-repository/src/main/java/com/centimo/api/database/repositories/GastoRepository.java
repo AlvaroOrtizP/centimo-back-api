@@ -13,9 +13,6 @@ public interface GastoRepository extends JpaRepository<GastoMO, String> {
   @Query(value = "SELECT g.* FROM gastos g WHERE g.instantanea_id = :instantaneaId", nativeQuery = true)
   List<GastoMO> findByInstantaneaId(@Param("instantaneaId") String instantaneaId);
 
-  @Query(value = "SELECT g.* FROM gastos g WHERE g.instantanea_id = :instantaneaId AND g.categoria = :categoria", nativeQuery = true)
-  List<GastoMO> findByInstantaneaIdAndCategoria(@Param("instantaneaId") String instantaneaId, @Param("categoria") String categoria);
-
   @Query("SELECT g FROM GastoMO g WHERE g.instantanea.id IN :ids")
   List<GastoMO> findByInstantaneaIds(@Param("ids") Collection<String> ids);
 }
