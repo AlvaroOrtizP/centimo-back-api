@@ -42,6 +42,15 @@ public class CrowdlendingController implements CrowdlendingApi {
     }
 
     @Override
+    public ResponseEntity<CrowdlendingInvestment> updateCrowdlending(String id, CrowdlendingInvestmentCreate crowdlendingInvestmentCreate) {
+        log.info("updateCrowdlending id={}", id);
+        CrowdlendingInversion modeloEntrada = mapper.toDomain(crowdlendingInvestmentCreate);
+        CrowdlendingInversion modeloActualizado = crowdlendingDrivingPort.actualizar(id, modeloEntrada);
+        CrowdlendingInvestment response = mapper.toCrowdlendingInvestment(modeloActualizado);
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
     public ResponseEntity<Void> deleteCrowdlending(String id) {
         log.info("deleteCrowdlending id={}", id);
         crowdlendingDrivingPort.eliminar(id);

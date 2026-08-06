@@ -15,5 +15,8 @@ public interface CrowdlendingDrivingPort {
   CrowdlendingInversion crear(CrowdlendingInversion inversion);
 
   @Transactional
+  CrowdlendingInversion actualizar(String id, CrowdlendingInversion inversion);
+
+  @Transactional
   void eliminar(String id);
 }

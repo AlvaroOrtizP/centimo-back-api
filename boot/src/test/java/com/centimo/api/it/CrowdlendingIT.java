@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -99,6 +100,58 @@ class CrowdlendingIT extends AbstractIntegrationIT {
 
     @Test
     @Order(5)
+    void actualizarInversion(CapturedOutput capturedOutput) throws Exception {
+        String id = jdbcTemplate.queryForObject(
+            "SELECT id FROM inversiones_crowdlending WHERE plataforma_id = ?",
+            String.class, PLATAFORMA_ID);
+
+        mockMvc.perform(put("/crowdlending/{id}", id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                      "platformId": "%s",
+                      "projectName": "Vivienda Barcelona",
+                      "investedAmount": 1500.00,
+                      "interestRate": 9.0,
+                      "termMonths": 24,
+                      "startDate": "2026-07-01",
+                      "endDate": "2028-06-30",
+                      "monthlyReturn": 11.25,
+                      "totalReturned": 200.00,
+                      "status": "completed"
+                    }
+                    """.formatted(PLATAFORMA_ID)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(id))
+            .andExpect(jsonPath("$.projectName").value("Vivienda Barcelona"))
+            .andExpect(jsonPath("$.investedAmount").value(1500.00))
+            .andExpect(jsonPath("$.interestRate").value(9.0))
+            .andExpect(jsonPath("$.termMonths").value(24))
+            .andExpect(jsonPath("$.totalReturned").value(200.00))
+            .andExpect(jsonPath("$.status").value("completed"));
+
+        assertThat(jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM inversiones_crowdlending WHERE plataforma_id = ?",
+            Integer.class, PLATAFORMA_ID)).isOne();
+
+        String nombreProyecto = jdbcTemplate.queryForObject(
+            "SELECT nombre_proyecto FROM inversiones_crowdlending WHERE id = ?",
+            String.class, id);
+        assertThat(nombreProyecto).isEqualTo("Vivienda Barcelona");
+
+        Float cantidad = jdbcTemplate.queryForObject(
+            "SELECT cantidad_invertida FROM inversiones_crowdlending WHERE id = ?",
+            Float.class, id);
+        assertThat(cantidad).isEqualTo(1500.00f);
+
+        String estado = jdbcTemplate.queryForObject(
+            "SELECT estado FROM inversiones_crowdlending WHERE id = ?",
+            String.class, id);
+        assertThat(estado).isEqualTo("completed");
+    }
+
+    @Test
+    @Order(6)
     void eliminarInversion(CapturedOutput capturedOutput) throws Exception {
         String id = jdbcTemplate.queryForObject(
             "SELECT id FROM inversiones_crowdlending WHERE plataforma_id = ?",
@@ -111,7 +164,7 @@ class CrowdlendingIT extends AbstractIntegrationIT {
     }
 
     @Test
-    @Order(6)
+    @Order(7)
     void validarCamposObligatorios(CapturedOutput capturedOutput) throws Exception {
         mockMvc.perform(post("/crowdlending")
                 .contentType(MediaType.APPLICATION_JSON)

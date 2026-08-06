@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -32,6 +33,26 @@ public class CrowdlendingUseCase implements CrowdlendingDrivingPort {
   @Override
   public CrowdlendingInversion crear(CrowdlendingInversion inversion) {
     return crowdlendingDrivenPort.guardar(inversion);
+  }
+
+  @Transactional
+  @Override
+  public CrowdlendingInversion actualizar(String id, CrowdlendingInversion inversion) {
+    CrowdlendingInversion existente = crowdlendingDrivenPort.findById(id).orElseThrow();
+
+    existente.setPlataformaId(inversion.getPlataformaId());
+    existente.setNombreProyecto(inversion.getNombreProyecto());
+    existente.setCantidadInvertida(inversion.getCantidadInvertida());
+    existente.setTipoInteres(inversion.getTipoInteres());
+    existente.setPlazoMeses(inversion.getPlazoMeses());
+    existente.setFechaInicio(inversion.getFechaInicio());
+    existente.setFechaFin(inversion.getFechaFin());
+    existente.setRetornoMensual(inversion.getRetornoMensual());
+    existente.setTotalDevuelto(inversion.getTotalDevuelto());
+    existente.setEstado(inversion.getEstado());
+    existente.setFechaActualizacion(LocalDateTime.now());
+
+    return crowdlendingDrivenPort.guardar(existente);
   }
 
   @Transactional
