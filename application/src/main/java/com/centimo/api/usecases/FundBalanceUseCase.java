@@ -32,6 +32,9 @@ public class FundBalanceUseCase implements FundBalanceDrivingPort {
     BalanceFondo existente = fundBalanceDrivenPort.findById(id).orElseThrow();
 
     existente.setSaldo(balance.getSaldo());
+    existente.setIntereses(balance.getIntereses());
+    existente.setAportacion(balance.getAportacion());
+    existente.setRetirada(balance.getRetirada());
 
     return fundBalanceDrivenPort.save(existente);
   }

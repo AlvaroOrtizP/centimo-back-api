@@ -21,5 +21,8 @@ public class BalanceFondo {
   private Integer anio;
   private Integer mes;
   private BigDecimal saldo;
+  private BigDecimal intereses;
+  private BigDecimal aportacion;
+  private BigDecimal retirada;
   private LocalDateTime fechaCreacion;
 }

@@ -42,6 +42,15 @@ public class BalanceFondoMO {
   @Column(nullable = false, precision = 12, scale = 2)
   private BigDecimal saldo;
 
+  @Column(precision = 12, scale = 2)
+  private BigDecimal intereses;
+
+  @Column(precision = 12, scale = 2)
+  private BigDecimal aportacion;
+
+  @Column(precision = 12, scale = 2)
+  private BigDecimal retirada;
+
   @CreationTimestamp
   @Column(name = "fecha_creacion", updatable = false)
   private LocalDateTime fechaCreacion;
