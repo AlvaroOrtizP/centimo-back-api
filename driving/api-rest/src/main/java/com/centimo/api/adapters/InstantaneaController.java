@@ -3,6 +3,7 @@ package com.centimo.api.adapters;
 import com.centimo.api.SnapshotsApi;
 import com.centimo.api.domain.models.InstantaneaMensual;
 import com.centimo.api.dto.MonthlySnapshotCreate;
+import com.centimo.api.dto.MonthlySnapshotUpdate;
 import com.centimo.api.dto.SnapshotResponse;
 import com.centimo.api.dto.SnapshotUpsert;
 import com.centimo.api.mappers.InstantaneaApiMapper;
@@ -78,8 +79,19 @@ ingresos y tareas.
                 BigDecimal.valueOf(snapshotUpsert.getBalance()),
                 BigDecimal.valueOf(snapshotUpsert.getIncomeDelta()),
                 snapshotUpsert.getExpenses() != null ? BigDecimal.valueOf(snapshotUpsert.getExpenses()) : null,
-                snapshotUpsert.getContribution() != null ? BigDecimal.valueOf(snapshotUpsert.getContribution()) : null);
+                snapshotUpsert.getContribution() != null ? BigDecimal.valueOf(snapshotUpsert.getContribution()) : null,
+                snapshotUpsert.getTax() != null ? BigDecimal.valueOf(snapshotUpsert.getTax()) : null);
         SnapshotResponse response = mapper.toSnapshotResponse(resultado);
         return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public ResponseEntity<SnapshotResponse> updateSnapshot(String id, MonthlySnapshotUpdate monthlySnapshotUpdate) {
+        log.info("updateSnapshot");
+        InstantaneaMensual cambios = mapper.toDomain(monthlySnapshotUpdate);
+        return instantaneaDrivingPort.actualizar(id, cambios)
+                .map(mapper::toSnapshotResponse)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

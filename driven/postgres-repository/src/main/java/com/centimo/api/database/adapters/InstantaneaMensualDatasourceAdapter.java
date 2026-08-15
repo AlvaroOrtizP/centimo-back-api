@@ -68,6 +68,7 @@ public class InstantaneaMensualDatasourceAdapter implements InstantaneaDrivenPor
         entity.setIngresos(instantanea.getIngresos());
         entity.setGastos(instantanea.getGastos());
         entity.setAportacion(instantanea.getAportacion());
+        entity.setHacienda(instantanea.getHacienda());
         entity.setNotas(instantanea.getNotas());
 
         cuentaDrivenPort.findById(instantanea.getCuentaId())

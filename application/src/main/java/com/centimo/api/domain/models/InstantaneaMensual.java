@@ -24,6 +24,7 @@ public class InstantaneaMensual {
   private BigDecimal ingresos;
   private BigDecimal gastos;
   private BigDecimal aportacion;
+  private BigDecimal hacienda;
   private String notas;
   private LocalDateTime fechaCreacion;
   private LocalDateTime fechaActualizacion;
