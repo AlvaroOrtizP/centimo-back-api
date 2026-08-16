@@ -2,7 +2,9 @@ package com.centimo.api.database.adapters;
 
 import com.centimo.api.database.mappers.BalanceFondoDatasourceMapper;
 import com.centimo.api.database.models.BalanceFondoMO;
+import com.centimo.api.database.models.InstantaneaMensualMO;
 import com.centimo.api.database.repositories.BalanceFondoRepository;
+import com.centimo.api.database.repositories.CuentaRepository;
 import com.centimo.api.database.repositories.FondoMyInvestorRepository;
 import com.centimo.api.database.repositories.InstantaneaMensualRepository;
 import com.centimo.api.domain.models.BalanceFondo;
@@ -22,6 +24,7 @@ public class BalanceFondoDatasourceAdapter implements FundBalanceDrivenPort {
   private final BalanceFondoRepository balanceFondoRepository;
   private final InstantaneaMensualRepository instantaneaMensualRepository;
   private final FondoMyInvestorRepository fondoMyInvestorRepository;
+  private final CuentaRepository cuentaRepository;
   private final BalanceFondoDatasourceMapper mapper;
 
   @Override
@@ -55,21 +58,52 @@ public class BalanceFondoDatasourceAdapter implements FundBalanceDrivenPort {
 
     BalanceFondoMO saved = balanceFondoRepository.save(entity);
 
-    var optional = instantaneaMensualRepository.findByCuentaIdAndAnioAndMes("myinvestor-fondo", balance.getAnio(), balance.getMes());
-    if(optional.isPresent()){
-      var instantanea =  optional.get();
-      instantanea.setSaldo(instantanea.getSaldo().add(balance.getSaldo()));
-      instantanea.setAportacion(instantanea.getAportacion().add(balance.getAportacion()));
-      instantaneaMensualRepository.save(instantanea);
-    }else{
-
-    }
+    sincronizarInstantaneaFondo(balance.getAnio(), balance.getMes());
 
     return mapper.toDomain(saved);
   }
 
+  private void sincronizarInstantaneaFondo(Integer anio, Integer mes) {
+    List<BalanceFondoMO> balances = balanceFondoRepository.findByAnioAndMes(anio, mes);
+
+    BigDecimal saldoTotal = BigDecimal.ZERO;
+    BigDecimal ingresosTotal = BigDecimal.ZERO;
+    BigDecimal aportacionTotal = BigDecimal.ZERO;
+    BigDecimal gastosTotal = BigDecimal.ZERO;
+    for (BalanceFondoMO b : balances) {
+      saldoTotal = saldoTotal.add(b.getSaldo() != null ? b.getSaldo() : BigDecimal.ZERO);
+      ingresosTotal = ingresosTotal.add(b.getIntereses() != null ? b.getIntereses() : BigDecimal.ZERO);
+      aportacionTotal = aportacionTotal.add(b.getAportacion() != null ? b.getAportacion() : BigDecimal.ZERO);
+      gastosTotal = gastosTotal.add(b.getRetirada() != null ? b.getRetirada() : BigDecimal.ZERO);
+    }
+
+    Optional<InstantaneaMensualMO> optional = instantaneaMensualRepository
+        .findByCuentaIdAndAnioAndMes("myinvestor-fondo", anio, mes);
+
+    InstantaneaMensualMO instantanea;
+    if (optional.isPresent()) {
+      instantanea = optional.get();
+    } else {
+      instantanea = new InstantaneaMensualMO();
+      instantanea.setId(UUID.randomUUID().toString());
+      cuentaRepository.findById("myinvestor-fondo").ifPresent(instantanea::setCuenta);
+      instantanea.setAnio(anio);
+      instantanea.setMes(mes);
+    }
+    instantanea.setSaldo(saldoTotal);
+    instantanea.setIngresos(ingresosTotal);
+    instantanea.setAportacion(aportacionTotal);
+    instantanea.setGastos(gastosTotal);
+    instantaneaMensualRepository.save(instantanea);
+  }
+
   @Override
   public void delete(String id) {
-    balanceFondoRepository.deleteById(id);
+    balanceFondoRepository.findById(id).ifPresent(b -> {
+      Integer anio = b.getAnio();
+      Integer mes = b.getMes();
+      balanceFondoRepository.deleteById(id);
+      sincronizarInstantaneaFondo(anio, mes);
+    });
   }
 }
