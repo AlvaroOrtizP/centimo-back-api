@@ -4,11 +4,13 @@ import com.centimo.api.database.mappers.BalanceFondoDatasourceMapper;
 import com.centimo.api.database.models.BalanceFondoMO;
 import com.centimo.api.database.repositories.BalanceFondoRepository;
 import com.centimo.api.database.repositories.FondoMyInvestorRepository;
+import com.centimo.api.database.repositories.InstantaneaMensualRepository;
 import com.centimo.api.domain.models.BalanceFondo;
 import com.centimo.api.ports.driven.FundBalanceDrivenPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -18,6 +20,7 @@ import java.util.UUID;
 public class BalanceFondoDatasourceAdapter implements FundBalanceDrivenPort {
 
   private final BalanceFondoRepository balanceFondoRepository;
+  private final InstantaneaMensualRepository instantaneaMensualRepository;
   private final FondoMyInvestorRepository fondoMyInvestorRepository;
   private final BalanceFondoDatasourceMapper mapper;
 
@@ -51,6 +54,17 @@ public class BalanceFondoDatasourceAdapter implements FundBalanceDrivenPort {
             .ifPresent(entity::setFondo);
 
     BalanceFondoMO saved = balanceFondoRepository.save(entity);
+
+    var optional = instantaneaMensualRepository.findByCuentaIdAndAnioAndMes("myinvestor-fondo", balance.getAnio(), balance.getMes());
+    if(optional.isPresent()){
+      var instantanea =  optional.get();
+      instantanea.setSaldo(instantanea.getSaldo().add(balance.getSaldo()));
+      instantanea.setAportacion(instantanea.getAportacion().add(balance.getAportacion()));
+      instantaneaMensualRepository.save(instantanea);
+    }else{
+
+    }
+
     return mapper.toDomain(saved);
   }
 

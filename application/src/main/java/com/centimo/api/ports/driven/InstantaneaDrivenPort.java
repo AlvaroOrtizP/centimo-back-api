@@ -12,9 +12,17 @@ public interface InstantaneaDrivenPort {
 
   List<InstantaneaMensual> findByMes(Integer anio, Integer mes);
 
+  List<InstantaneaMensual> findByAnio(Integer anio);
+
+  List<InstantaneaMensual> findByCuentaId(String cuentaId);
+
+  List<InstantaneaMensual> findByCuentaIdAndAnio(String cuentaId, Integer anio);
+
   Optional<InstantaneaMensual> findByCompositeKey(String compositeKey);
 
   List<InstantaneaMensual> findAll();
 
   InstantaneaMensual guardar(InstantaneaMensual instantanea);
+
+  void eliminar(String id);
 }

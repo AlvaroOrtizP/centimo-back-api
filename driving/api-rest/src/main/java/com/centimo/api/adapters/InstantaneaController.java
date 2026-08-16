@@ -26,9 +26,9 @@ public class InstantaneaController implements SnapshotsApi {
     private final InstantaneaApiMapper mapper;
 
     @Override
-    public ResponseEntity<List<SnapshotResponse>> listSnapshots() {
-        log.info("listSnapshots");
-        List<SnapshotResponse> snapshots = instantaneaDrivingPort.listarTodas()
+    public ResponseEntity<List<SnapshotResponse>> listSnapshots(Integer year, String accountId) {
+        log.info("listSnapshots year={} accountId={}", year, accountId);
+        List<SnapshotResponse> snapshots = instantaneaDrivingPort.listarTodas(year, accountId)
                 .stream()
                 .map(mapper::toSnapshotResponse)
                 .toList();
@@ -93,5 +93,12 @@ ingresos y tareas.
                 .map(mapper::toSnapshotResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @Override
+    public ResponseEntity<Void> deleteSnapshot(String id) {
+        log.info("deleteSnapshot id={}", id);
+        boolean eliminado = instantaneaDrivingPort.eliminar(id);
+        return eliminado ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 }

@@ -45,6 +45,30 @@ public class InstantaneaMensualDatasourceAdapter implements InstantaneaDrivenPor
     }
 
     @Override
+    public List<InstantaneaMensual> findByAnio(Integer anio) {
+        return instantaneaRepository.findByAnio(anio)
+                .stream()
+                .map(mapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<InstantaneaMensual> findByCuentaId(String cuentaId) {
+        return instantaneaRepository.findByCuentaId(cuentaId)
+                .stream()
+                .map(mapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<InstantaneaMensual> findByCuentaIdAndAnio(String cuentaId, Integer anio) {
+        return instantaneaRepository.findByCuentaIdAndAnio(cuentaId, anio)
+                .stream()
+                .map(mapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public List<InstantaneaMensual> findAll() {
         return instantaneaRepository.findAll()
                 .stream()
@@ -76,6 +100,11 @@ public class InstantaneaMensualDatasourceAdapter implements InstantaneaDrivenPor
 
         InstantaneaMensualMO savedEntity = instantaneaRepository.save(entity);
         return mapper.toDomain(savedEntity);
+    }
+
+    @Override
+    public void eliminar(String id) {
+        instantaneaRepository.deleteById(id);
     }
 
     @Override

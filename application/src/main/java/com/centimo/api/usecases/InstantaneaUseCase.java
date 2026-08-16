@@ -23,7 +23,16 @@ public class InstantaneaUseCase implements InstantaneaDrivingPort {
   }
 
   @Override
-  public List<InstantaneaMensual> listarTodas() {
+  public List<InstantaneaMensual> listarTodas(Integer year, String accountId) {
+    if (accountId != null && year != null) {
+      return instantaneaDrivenPort.findByCuentaIdAndAnio(accountId, year);
+    }
+    if (accountId != null) {
+      return instantaneaDrivenPort.findByCuentaId(accountId);
+    }
+    if (year != null) {
+      return instantaneaDrivenPort.findByAnio(year);
+    }
     return instantaneaDrivenPort.findAll();
   }
 
@@ -43,7 +52,7 @@ public class InstantaneaUseCase implements InstantaneaDrivingPort {
     if (existente.isPresent()) {
       InstantaneaMensual instantanea = existente.get();
       instantanea.setSaldo(balance);
-      instantanea.setIngresos(instantanea.getIngresos().add(incomeDelta));
+      instantanea.setIngresos(incomeDelta);
       if (expenses != null) {
         instantanea.setGastos(expenses);
       }
@@ -79,5 +88,15 @@ public class InstantaneaUseCase implements InstantaneaDrivingPort {
       existente.setNotas(cambios.getNotas());
       return instantaneaDrivenPort.guardar(existente);
     });
+  }
+
+  @Transactional
+  @Override
+  public boolean eliminar(String id) {
+    if (instantaneaDrivenPort.findById(id).isEmpty()) {
+      return false;
+    }
+    instantaneaDrivenPort.eliminar(id);
+    return true;
   }
 }
