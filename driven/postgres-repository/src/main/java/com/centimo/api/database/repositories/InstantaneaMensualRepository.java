@@ -14,4 +14,10 @@ public interface InstantaneaMensualRepository extends JpaRepository<InstantaneaM
 
   @Query("SELECT i FROM InstantaneaMensualMO i WHERE i.anio = :anio AND i.mes = :mes")
   List<InstantaneaMensualMO> findByAnioAndMes(@Param("anio") Integer anio, @Param("mes") Integer mes);
+
+  List<InstantaneaMensualMO> findByAnio(@Param("anio") Integer anio);
+
+  List<InstantaneaMensualMO> findByCuentaId(@Param("cuentaId") String cuentaId);
+
+  List<InstantaneaMensualMO> findByCuentaIdAndAnio(@Param("cuentaId") String cuentaId, @Param("anio") Integer anio);
 }

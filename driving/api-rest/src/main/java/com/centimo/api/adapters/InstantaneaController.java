@@ -3,6 +3,7 @@ package com.centimo.api.adapters;
 import com.centimo.api.SnapshotsApi;
 import com.centimo.api.domain.models.InstantaneaMensual;
 import com.centimo.api.dto.MonthlySnapshotCreate;
+import com.centimo.api.dto.MonthlySnapshotUpdate;
 import com.centimo.api.dto.SnapshotResponse;
 import com.centimo.api.dto.SnapshotUpsert;
 import com.centimo.api.mappers.InstantaneaApiMapper;
@@ -25,9 +26,9 @@ public class InstantaneaController implements SnapshotsApi {
     private final InstantaneaApiMapper mapper;
 
     @Override
-    public ResponseEntity<List<SnapshotResponse>> listSnapshots() {
-        log.info("listSnapshots");
-        List<SnapshotResponse> snapshots = instantaneaDrivingPort.listarTodas()
+    public ResponseEntity<List<SnapshotResponse>> listSnapshots(Integer year, String accountId) {
+        log.info("listSnapshots year={} accountId={}", year, accountId);
+        List<SnapshotResponse> snapshots = instantaneaDrivingPort.listarTodas(year, accountId)
                 .stream()
                 .map(mapper::toSnapshotResponse)
                 .toList();
@@ -78,8 +79,26 @@ ingresos y tareas.
                 BigDecimal.valueOf(snapshotUpsert.getBalance()),
                 BigDecimal.valueOf(snapshotUpsert.getIncomeDelta()),
                 snapshotUpsert.getExpenses() != null ? BigDecimal.valueOf(snapshotUpsert.getExpenses()) : null,
-                snapshotUpsert.getContribution() != null ? BigDecimal.valueOf(snapshotUpsert.getContribution()) : null);
+                snapshotUpsert.getContribution() != null ? BigDecimal.valueOf(snapshotUpsert.getContribution()) : null,
+                snapshotUpsert.getTax() != null ? BigDecimal.valueOf(snapshotUpsert.getTax()) : null);
         SnapshotResponse response = mapper.toSnapshotResponse(resultado);
         return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public ResponseEntity<SnapshotResponse> updateSnapshot(String id, MonthlySnapshotUpdate monthlySnapshotUpdate) {
+        log.info("updateSnapshot");
+        InstantaneaMensual cambios = mapper.toDomain(monthlySnapshotUpdate);
+        return instantaneaDrivingPort.actualizar(id, cambios)
+                .map(mapper::toSnapshotResponse)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @Override
+    public ResponseEntity<Void> deleteSnapshot(String id) {
+        log.info("deleteSnapshot id={}", id);
+        boolean eliminado = instantaneaDrivingPort.eliminar(id);
+        return eliminado ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 }

@@ -44,6 +44,9 @@ public class InstantaneaMensualMO {
   @Column(precision = 10, scale = 2)
   private BigDecimal aportacion;
 
+  @Column(precision = 10, scale = 2)
+  private BigDecimal hacienda;
+
   @Column(columnDefinition = "TEXT")
   private String notas;
 

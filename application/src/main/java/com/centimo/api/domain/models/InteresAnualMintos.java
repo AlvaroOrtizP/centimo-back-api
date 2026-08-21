@@ -14,18 +14,14 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InstantaneaMensual {
+public class InteresAnualMintos {
 
   private String id;
-  private String cuentaId;
   private Integer anio;
-  private Integer mes;
-  private BigDecimal saldo;
-  private BigDecimal ingresos;
-  private BigDecimal gastos;
-  private BigDecimal aportacion;
-  private BigDecimal hacienda;
-  private String notas;
+  private BigDecimal cantidad;
+  private BigDecimal retencionImpuestos;
+  private BigDecimal tipoImpositivo;
+  private BigDecimal importeNeto;
   private LocalDateTime fechaCreacion;
   private LocalDateTime fechaActualizacion;
 }

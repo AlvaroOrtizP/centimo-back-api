@@ -11,7 +11,7 @@ public interface InstantaneaDrivingPort {
 
     Optional<InstantaneaMensual> obtenerPorFecha(String accountId, Integer year, Integer month);
 
-    List<InstantaneaMensual> listarTodas();
+    List<InstantaneaMensual> listarTodas(Integer year, String accountId);
 
     @Transactional
     InstantaneaMensual crear(InstantaneaMensual nuevaInstantanea);
@@ -19,5 +19,11 @@ public interface InstantaneaDrivingPort {
     @Transactional
     InstantaneaMensual upsert(String accountId, Integer year, Integer month,
                               BigDecimal balance, BigDecimal incomeDelta,
-                              BigDecimal expenses, BigDecimal contribution);
+                              BigDecimal expenses, BigDecimal contribution, BigDecimal hacienda);
+
+    @Transactional
+    Optional<InstantaneaMensual> actualizar(String id, InstantaneaMensual cambios);
+
+    @Transactional
+    boolean eliminar(String id);
 }
