@@ -48,6 +48,18 @@ tags:
     description: Login, 2FA (TOTP) y gestión de factor de doble autenticación
 
 paths:
+  /health:
+    get:
+      summary: Health check
+      description: Endpoint publico para verificar que el backend esta activo. No requiere autenticacion.
+      operationId: healthCheck
+      tags:
+        - Health
+      security: [ ]
+      responses:
+        '200':
+          description: El backend esta activo y responde correctamente
+
   # ════════════════════════════════════════════
   #  CONFIGURACIÓN
   # ════════════════════════════════════════════
