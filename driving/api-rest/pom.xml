@@ -72,6 +72,7 @@
 								<useTags>true</useTags>
 								<useSpringBoot3>true</useSpringBoot3>
 								<openApiNullable>false</openApiNullable>
+								<requestMappingMode>api_interface</requestMappingMode>
 							</configOptions>
 						</configuration>
 					</execution>
