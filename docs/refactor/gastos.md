@@ -38,6 +38,14 @@ CREATE TABLE gastos (
 );
 
 CREATE INDEX idx_gastos_instantanea ON gastos(instantanea_id);
+
+COMMENT ON COLUMN gastos.id IS 'UUID generado por la aplicación';
+COMMENT ON COLUMN gastos.instantanea_id IS 'Instantánea mensual a la que pertenece el gasto (instantaneas_mensuales.id, ON DELETE CASCADE)';
+COMMENT ON COLUMN gastos.categoria IS 'Categoría del gasto (ExpenseCategory)';
+COMMENT ON COLUMN gastos.cantidad IS 'Importe del gasto';
+COMMENT ON COLUMN gastos.fecha IS 'Fecha del gasto';
+COMMENT ON COLUMN gastos.descripcion IS 'Nota opcional (nullable)';
+COMMENT ON COLUMN gastos.fecha_creacion IS 'Auditoría: fecha de creación';
 ```
 
 ## Endpoints
