@@ -1,5 +1,7 @@
 # Entidad: InteresAnualMintos — Intereses de Mintos por mes
 
+> **Implementado:** `false`
+
 Entidad dedicada a los intereses de la plataforma Mintos. **Una fila por mes-año**: cada registro guarda el valor final de la cartera de Mintos en un mes concreto (formato `YYYY-MM`, p. ej. `2026-07`), el importe añadido ese mes (el aporte extra, que puede ser 0) y una descripción opcional.
 
 ## Datos que guarda

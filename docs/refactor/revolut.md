@@ -1,5 +1,7 @@
 # Entidad: RevolutBalance — Balance mensual de Revolut
 
+> **Implementado:** `false`
+
 Entidad dedicada a Revolut. Una fila por mes: el dinero que hay en Revolut en cada mes, junto con el aporte que se hace ese mes.
 
 ## Datos que guarda

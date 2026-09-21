@@ -1,5 +1,7 @@
 # Entidades: MyInvestor — Activos y balances mensuales
 
+> **Implementado:** `false`
+
 Entidad dedicada a MyInvestor. La pantalla de MyInvestor agrupa **2 fondos indexados y 1 roboadvisor**. Está dividida en dos partes:
 
 1. **`FondoMyInvestor`**: catálogo de activos (`fondos_myinvestor`). Una fila por activo: fondo indexado o roboadvisor.

@@ -1,5 +1,7 @@
 # Entidades: Equito — Balance mensual y registro de compras
 
+> **Implementado:** `false`
+
 Entidad dedicada a Equito (crowdlending). Está dividida en dos partes:
 
 1. **`EquitoBalance`**: una fila por mes con el dinero en Equito, el aporte del mes y el bloque de Hacienda (Equito transfiere parte del dinero generado por tus alquileres a hacienda).

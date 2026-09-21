@@ -1,5 +1,7 @@
 # Entidad: Gasto — Gastos mensuales
 
+> **Implementado:** `false`
+
 Entidad dedicada a los gastos. Una fila por gasto realizado, ligada a una instantánea mensual: qué se gastó, en qué categoría, cuándo y por qué importe.
 
 ## Datos que guarda

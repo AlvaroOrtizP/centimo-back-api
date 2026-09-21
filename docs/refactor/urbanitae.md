@@ -1,5 +1,7 @@
 # Entidades: Urbanitae — Balance mensual y registro de compras
 
+> **Implementado:** `false`
+
 Entidad dedicada a Urbanitae (crowdlending inmobiliario). Dividida en dos partes, igual que Equito:
 
 1. **`UrbanitaeBalance`**: una fila por mes con el dinero en Urbanitae, el aporte del mes y el bloque de Hacienda (Urbanitae paga parte de lo que obtuviste con tus rentas).
