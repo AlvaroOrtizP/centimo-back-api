@@ -1,6 +1,6 @@
 # Entidades: Equito — Balance mensual y registro de compras
 
-> **Implementado:** `false`
+> **Implementado:** `true`
 
 Entidad dedicada a Equito (crowdlending). Está dividida en dos partes:
 
@@ -168,12 +168,15 @@ COMMENT ON COLUMN equito_compras.fecha_actualizacion IS 'Auditoría: fecha de ú
 - Sin FK a `cuentas`: son datos propios del ecosistema Equito.
 - `mes` inmutable en el `UPDATE` del balance; en las compras se cambia el `estado` (activa → vendida).
 - Patrón hexagonal del proyecto, como `InteresAnualMintos` o `BalanceFondo`.
+- El MO reutiliza el enum de dominio (`EstadoEquitoCompra`), no duplica enum.
 
-## Capas de implementación previstas
+## Arquitectura implementada
 
-- **Capa de aplicación**: `EquitoBalance`, `EquitoCompra` (domain models), `EquitoBalanceDrivingPort`/`EquitoCompraDrivingPort`, `EquitoBalanceUseCase`/`EquitoCompraUseCase`, `EquitoBalanceDrivenPort`/`EquitoCompraDrivenPort`.
-- **Capa driven**: `EquitoBalanceMO`/`EquitoCompraMO`, repositorios, `EquitoBalanceDatasourceAdapter`/`EquitoCompraDatasourceAdapter`, `EquitoBalanceDatasourceMapper`/`EquitoCompraDatasourceMapper`.
-- **Capa driving**: controladores implementando las APIs de swagger, `EquitoBalanceApiMapper`/`EquitoCompraApiMapper`.
-- **Swagger**: nuevos schemas y paths para `EquitoBalance` y `EquitoCompra`.
-- **Flyway**: nueva migración `V19__create_equito.sql` con `equito_balances` y `equito_compras`.
-- **Tests**: no hay IT específico para estas entidades. `EquitoIT` cubre la pantalla de Equito con el CRUD genérico de crowdlending (`/crowdlending`) y snapshots; habrá que ampliarlo (o crear `EquitoEntityIT`) para estas dos entidades.
+Sigue exactamente el patrón de `Urbanitae` (misma estructura «balance + compras» en `equito_balances` y `equito_compras`):
+
+- **Capa de aplicación**: `EquitoBalance`, `EquitoCompra` (domain models), `EstadoEquitoCompra` (domain enum), `EquitoBalanceDrivingPort`/`EquitoCompraDrivingPort`, `EquitoBalanceUseCase`/`EquitoCompraUseCase`, `EquitoBalanceDrivenPort`/`EquitoCompraDrivenPort`.
+- **Capa driven**: `EquitoBalanceMO`/`EquitoCompraMO` (con `@CreationTimestamp`/`@UpdateTimestamp`), repositorios (`findByMes`, `findByEstado` con Sort), `EquitoBalanceDatasourceAdapter`/`EquitoCompraDatasourceAdapter` (default 24, orden por `mes`/`fecha`, UUID en compras), `EquitoBalanceDatasourceMapper`/`EquitoCompraDatasourceMapper`.
+- **Capa driving**: `EquitoBalanceController`/`EquitoCompraController` implementan las APIs de swagger; `EquitoBalanceApiMapper`/`EquitoCompraApiMapper`; estado de compra inválido devuelve 400.
+- **Swagger**: schemas y paths para `/equito/balances` y `/equito/compras` (GET/POST + `/{id}` PUT/DELETE).
+- **Flyway**: `V22__create_equito.sql` con `equito_balances` y `equito_compras`.
+- **Tests**: `EquitoEntityIT` con 15 casos cubriendo el CRUD de ambas entidades.
