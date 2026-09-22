@@ -28,8 +28,8 @@ public class B100BalanceUseCase implements B100BalanceDrivingPort {
   }
 
   @Override
-  public List<B100Balance> listarPorSubcuenta(TipoSubcuentaB100 tipoSubcuenta, Integer limit, String order) {
-    return b100BalanceDrivenPort.findByTipoSubcuenta(tipoSubcuenta, limit, order);
+  public List<B100Balance> listarPorSubcuenta(TipoSubcuentaB100 tipoSubcuenta, String mes, Integer limit, String order) {
+    return b100BalanceDrivenPort.findByTipoSubcuenta(tipoSubcuenta, mes, limit, order);
   }
 
   @Transactional

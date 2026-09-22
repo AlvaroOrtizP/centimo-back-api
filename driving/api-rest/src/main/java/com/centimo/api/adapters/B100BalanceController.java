@@ -24,13 +24,13 @@ public class B100BalanceController implements B100BalanceApi {
   private final B100BalanceApiMapper mapper;
 
   @Override
-  public ResponseEntity<List<B100BalanceResponse>> listB100Balances(String tipoSubcuenta, Integer limit, String order) {
-    log.info("listB100Balances tipoSubcuenta={} limit={} order={}", tipoSubcuenta, limit, order);
+  public ResponseEntity<List<B100BalanceResponse>> listB100Balances(String tipoSubcuenta, String mes, Integer limit, String order) {
+    log.info("listB100Balances tipoSubcuenta={} mes={} limit={} order={}", tipoSubcuenta, mes, limit, order);
     TipoSubcuentaB100 tipo = parseTipoSubcuenta(tipoSubcuenta);
     if (tipo == null) {
       return ResponseEntity.badRequest().build();
     }
-    List<B100BalanceResponse> balances = b100BalanceDrivingPort.listarPorSubcuenta(tipo, limit, order).stream()
+    List<B100BalanceResponse> balances = b100BalanceDrivingPort.listarPorSubcuenta(tipo, mes, limit, order).stream()
         .map(mapper::toB100BalanceResponse)
         .toList();
     return ResponseEntity.ok(balances);

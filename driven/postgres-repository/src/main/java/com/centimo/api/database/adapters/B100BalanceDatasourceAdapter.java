@@ -35,13 +35,17 @@ public class B100BalanceDatasourceAdapter implements B100BalanceDrivenPort {
   }
 
   @Override
-  public List<B100Balance> findByTipoSubcuenta(TipoSubcuentaB100 tipoSubcuenta, Integer limit, String order) {
+  public List<B100Balance> findByTipoSubcuenta(TipoSubcuentaB100 tipoSubcuenta, String mes, Integer limit, String order) {
     int size = limit != null && limit > 0 ? limit : LIMITE_POR_DEFECTO;
-    Sort.Direction direction = "asc".equalsIgnoreCase(order)
+    boolean ascendente = "asc".equalsIgnoreCase(order);
+    Sort.Direction direction = ascendente
         ? Sort.Direction.ASC
         : Sort.Direction.DESC;
     Pageable pageable = PageRequest.of(0, size, Sort.by(direction, "mes"));
-    return b100BalanceRepository.findByTipoSubcuenta(tipoSubcuenta, pageable).stream()
+    List<B100BalanceMO> rows = ascendente
+        ? b100BalanceRepository.findByTipoSubcuentaAndMesGreaterThanEqual(tipoSubcuenta, mes, pageable)
+        : b100BalanceRepository.findByTipoSubcuentaAndMesLessThanEqual(tipoSubcuenta, mes, pageable);
+    return rows.stream()
         .map(mapper::toDomain)
         .toList();
   }

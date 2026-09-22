@@ -11,7 +11,7 @@ public interface B100BalanceDrivingPort {
 
   Optional<B100Balance> obtenerPorSubcuentaYMes(TipoSubcuentaB100 tipoSubcuenta, String mes);
 
-  List<B100Balance> listarPorSubcuenta(TipoSubcuentaB100 tipoSubcuenta, Integer limit, String order);
+  List<B100Balance> listarPorSubcuenta(TipoSubcuentaB100 tipoSubcuenta, String mes, Integer limit, String order);
 
   @Transactional
   B100Balance crear(B100Balance balance);

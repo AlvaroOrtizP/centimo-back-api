@@ -144,14 +144,15 @@ class B100IT extends AbstractIntegrationIT {
   class Listar {
 
     @Test
-    @DisplayName("por defecto devuelve solo la subcuenta pedida ordenada por mes descendente")
+    @DisplayName("por defecto devuelve los meses ≤ mes de la subcuenta pedida, ordenados desc")
     void listaDescendentePorDefecto() throws Exception {
       crear("save", "2026-01", 1.00, 10.00);
       crear("save", "2026-02", 2.00, 20.00);
       crear("save", "2026-03", 3.00, 30.00);
+      crear("save", "2026-04", 4.00, 40.00);
       crear("health", "2026-05", 5.00, 50.00);
 
-      mockMvc.perform(get(BASE).param("tipoSubcuenta", "save"))
+      mockMvc.perform(get(BASE).param("tipoSubcuenta", "save").param("mes", "2026-03"))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.length()").value(3))
           .andExpect(jsonPath("$[0].mes").value("2026-03"))
@@ -160,13 +161,14 @@ class B100IT extends AbstractIntegrationIT {
     }
 
     @Test
-    @DisplayName("order=asc invierte el orden y limit recorta el resultado")
+    @DisplayName("order=asc devuelve los meses ≥ mes y limit recorta el resultado")
     void listaAscendenteConLimite() throws Exception {
       crear("save", "2026-01", 1.00, 10.00);
       crear("save", "2026-02", 2.00, 20.00);
       crear("save", "2026-03", 3.00, 30.00);
 
-      mockMvc.perform(get(BASE).param("tipoSubcuenta", "save").param("order", "asc").param("limit", "2"))
+      mockMvc.perform(get(BASE).param("tipoSubcuenta", "save").param("mes", "2026-01")
+              .param("order", "asc").param("limit", "2"))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.length()").value(2))
           .andExpect(jsonPath("$[0].mes").value("2026-01"))
@@ -174,9 +176,24 @@ class B100IT extends AbstractIntegrationIT {
     }
 
     @Test
+    @DisplayName("el mes de partida filtra hacia delante con order=asc (excluye los anteriores)")
+    void mesFiltraHaciaAdelante() throws Exception {
+      crear("save", "2026-01", 1.00, 10.00);
+      crear("save", "2026-02", 2.00, 20.00);
+      crear("save", "2026-03", 3.00, 30.00);
+
+      mockMvc.perform(get(BASE).param("tipoSubcuenta", "save").param("mes", "2026-02")
+              .param("order", "asc"))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.length()").value(2))
+          .andExpect(jsonPath("$[0].mes").value("2026-02"))
+          .andExpect(jsonPath("$[1].mes").value("2026-03"));
+    }
+
+    @Test
     @DisplayName("sin datos devuelve lista vacía")
     void listaVacia() throws Exception {
-      mockMvc.perform(get(BASE).param("tipoSubcuenta", "save"))
+      mockMvc.perform(get(BASE).param("tipoSubcuenta", "save").param("mes", "2026-01"))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.length()").value(0));
     }
@@ -184,7 +201,7 @@ class B100IT extends AbstractIntegrationIT {
     @Test
     @DisplayName("tipo de subcuenta inválido devuelve 400")
     void tipoInvalido() throws Exception {
-      mockMvc.perform(get(BASE).param("tipoSubcuenta", "inexistente"))
+      mockMvc.perform(get(BASE).param("tipoSubcuenta", "inexistente").param("mes", "2026-01"))
           .andExpect(status().isBadRequest());
     }
   }
