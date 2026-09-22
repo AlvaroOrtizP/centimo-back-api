@@ -1,4 +1,4 @@
-CREATE TABLE b100_balances (
+CREATE TABLE IF NOT EXISTS b100_balances (
   id                    VARCHAR(50)   PRIMARY KEY,
   tipo_subcuenta        VARCHAR(20)   NOT NULL CHECK (tipo_subcuenta IN ('save', 'health')),
   mes                   VARCHAR(7)    NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE b100_balances (
   UNIQUE(tipo_subcuenta, mes)
 );
 
-CREATE INDEX idx_b100_balances_mes ON b100_balances(mes);
+CREATE INDEX IF NOT EXISTS idx_b100_balances_mes ON b100_balances(mes);
 
 COMMENT ON COLUMN b100_balances.id IS 'Clave natural {tipo}-{AAAA-MM} (p. ej. save-2026-07)';
 COMMENT ON COLUMN b100_balances.tipo_subcuenta IS 'Tipo de subcuenta B100: save o health';
