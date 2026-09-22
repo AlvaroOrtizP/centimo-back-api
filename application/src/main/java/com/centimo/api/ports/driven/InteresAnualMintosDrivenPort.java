@@ -1,0 +1,19 @@
+package com.centimo.api.ports.driven;
+
+import com.centimo.api.domain.models.InteresAnualMintos;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface InteresAnualMintosDrivenPort {
+
+  Optional<InteresAnualMintos> findById(String id);
+
+  Optional<InteresAnualMintos> findByMes(String mes);
+
+  List<InteresAnualMintos> findAll();
+
+  InteresAnualMintos guardar(InteresAnualMintos interes);
+
+  void eliminar(String id);
+}
