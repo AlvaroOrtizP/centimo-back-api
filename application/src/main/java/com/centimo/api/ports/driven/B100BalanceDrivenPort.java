@@ -12,6 +12,8 @@ public interface B100BalanceDrivenPort {
 
   Optional<B100Balance> findByTipoSubcuentaAndMes(TipoSubcuentaB100 tipoSubcuenta, String mes);
 
+  List<B100Balance> findByTipoSubcuentaAndMesIn(TipoSubcuentaB100 tipoSubcuenta, List<String> meses);
+
   List<B100Balance> findByTipoSubcuenta(TipoSubcuentaB100 tipoSubcuenta, String mes, Integer limit, String order);
 
   B100Balance guardar(B100Balance balance);

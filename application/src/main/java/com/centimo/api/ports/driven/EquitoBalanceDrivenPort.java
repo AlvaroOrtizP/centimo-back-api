@@ -11,6 +11,8 @@ public interface EquitoBalanceDrivenPort {
 
   Optional<EquitoBalance> findByMes(String mes);
 
+  List<EquitoBalance> findByMesIn(List<String> meses);
+
   List<EquitoBalance> findAll(Integer limit, String order);
 
   EquitoBalance guardar(EquitoBalance balance);

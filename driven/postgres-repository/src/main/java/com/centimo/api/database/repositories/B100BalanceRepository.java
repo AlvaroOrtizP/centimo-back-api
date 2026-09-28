@@ -12,6 +12,8 @@ public interface B100BalanceRepository extends JpaRepository<B100BalanceMO, Stri
 
   Optional<B100BalanceMO> findByTipoSubcuentaAndMes(TipoSubcuentaB100 tipoSubcuenta, String mes);
 
+  List<B100BalanceMO> findByTipoSubcuentaAndMesIn(TipoSubcuentaB100 tipoSubcuenta, List<String> meses);
+
   List<B100BalanceMO> findByTipoSubcuentaAndMesLessThanEqual(TipoSubcuentaB100 tipoSubcuenta, String mes, Pageable pageable);
 
   List<B100BalanceMO> findByTipoSubcuentaAndMesGreaterThanEqual(TipoSubcuentaB100 tipoSubcuenta, String mes, Pageable pageable);

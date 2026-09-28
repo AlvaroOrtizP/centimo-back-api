@@ -31,6 +31,13 @@ public class InteresAnualMintosDatasourceAdapter implements InteresAnualMintosDr
   }
 
   @Override
+  public List<InteresAnualMintos> findByMesIn(List<String> meses) {
+    return interesAnualMintosRepository.findByMesIn(meses).stream()
+        .map(mapper::toDomain)
+        .toList();
+  }
+
+  @Override
   public List<InteresAnualMintos> findAll() {
     return interesAnualMintosRepository.findAll(Sort.by(Sort.Direction.DESC, "mes")).stream()
         .map(mapper::toDomain)

@@ -11,6 +11,8 @@ public interface InteresAnualMintosDrivenPort {
 
   Optional<InteresAnualMintos> findByMes(String mes);
 
+  List<InteresAnualMintos> findByMesIn(List<String> meses);
+
   List<InteresAnualMintos> findAll();
 
   InteresAnualMintos guardar(InteresAnualMintos interes);

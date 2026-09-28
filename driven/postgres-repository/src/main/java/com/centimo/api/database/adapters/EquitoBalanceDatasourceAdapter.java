@@ -34,6 +34,13 @@ public class EquitoBalanceDatasourceAdapter implements EquitoBalanceDrivenPort {
   }
 
   @Override
+  public List<EquitoBalance> findByMesIn(List<String> meses) {
+    return equitoBalanceRepository.findByMesIn(meses).stream()
+        .map(mapper::toDomain)
+        .toList();
+  }
+
+  @Override
   public List<EquitoBalance> findAll(Integer limit, String order) {
     int size = limit != null && limit > 0 ? limit : LIMITE_POR_DEFECTO;
     Sort.Direction direction = "asc".equalsIgnoreCase(order)

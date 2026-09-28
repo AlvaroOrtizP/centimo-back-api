@@ -46,6 +46,25 @@ public class BancoBalanceDatasourceAdapter implements BancoBalanceDrivenPort {
   }
 
   @Override
+  public List<BancoBalance> findByEntidadInAndMesIn(List<String> entidades, List<String> meses) {
+    return bancoBalanceRepository.findByEntidadInAndMesIn(entidades, meses).stream()
+        .map(mapper::toDomain)
+        .toList();
+  }
+
+  @Override
+  public List<BancoBalance> findByMesIn(List<String> meses) {
+    return bancoBalanceRepository.findByMesIn(meses).stream()
+        .map(mapper::toDomain)
+        .toList();
+  }
+
+  @Override
+  public List<String> findEntidades() {
+    return bancoBalanceRepository.findEntidades();
+  }
+
+  @Override
   public BancoBalance guardar(BancoBalance balance) {
     BancoBalanceMO entity = balance.getId() != null
         ? bancoBalanceRepository.findById(balance.getId()).orElse(mapper.toEntity(balance))

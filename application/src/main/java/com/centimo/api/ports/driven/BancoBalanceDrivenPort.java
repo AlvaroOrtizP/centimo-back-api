@@ -13,6 +13,12 @@ public interface BancoBalanceDrivenPort {
 
   List<BancoBalance> findByEntidad(String entidad, Integer limit, String order);
 
+  List<BancoBalance> findByEntidadInAndMesIn(List<String> entidades, List<String> meses);
+
+  List<BancoBalance> findByMesIn(List<String> meses);
+
+  List<String> findEntidades();
+
   BancoBalance guardar(BancoBalance balance);
 
   void eliminar(String id);

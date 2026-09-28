@@ -35,6 +35,13 @@ public class B100BalanceDatasourceAdapter implements B100BalanceDrivenPort {
   }
 
   @Override
+  public List<B100Balance> findByTipoSubcuentaAndMesIn(TipoSubcuentaB100 tipoSubcuenta, List<String> meses) {
+    return b100BalanceRepository.findByTipoSubcuentaAndMesIn(tipoSubcuenta, meses).stream()
+        .map(mapper::toDomain)
+        .toList();
+  }
+
+  @Override
   public List<B100Balance> findByTipoSubcuenta(TipoSubcuentaB100 tipoSubcuenta, String mes, Integer limit, String order) {
     int size = limit != null && limit > 0 ? limit : LIMITE_POR_DEFECTO;
     boolean ascendente = "asc".equalsIgnoreCase(order);

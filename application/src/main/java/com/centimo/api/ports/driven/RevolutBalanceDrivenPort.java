@@ -11,6 +11,8 @@ public interface RevolutBalanceDrivenPort {
 
   Optional<RevolutBalance> findByMes(String mes);
 
+  List<RevolutBalance> findByMesIn(List<String> meses);
+
   List<RevolutBalance> findAll(Integer limit, String order);
 
   RevolutBalance guardar(RevolutBalance balance);

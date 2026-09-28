@@ -34,6 +34,13 @@ public class RevolutBalanceDatasourceAdapter implements RevolutBalanceDrivenPort
   }
 
   @Override
+  public List<RevolutBalance> findByMesIn(List<String> meses) {
+    return revolutBalanceRepository.findByMesIn(meses).stream()
+        .map(mapper::toDomain)
+        .toList();
+  }
+
+  @Override
   public List<RevolutBalance> findAll(Integer limit, String order) {
     int size = limit != null && limit > 0 ? limit : LIMITE_POR_DEFECTO;
     Sort.Direction direction = "asc".equalsIgnoreCase(order)

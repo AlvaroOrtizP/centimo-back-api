@@ -11,5 +11,7 @@ public interface BalanceFondoRepository extends JpaRepository<BalanceFondoMO, St
 
   List<BalanceFondoMO> findByAnioAndMes(Integer anio, Integer mes, Sort sort);
 
+  List<BalanceFondoMO> findByAnioInAndMesIn(List<Integer> anios, List<Integer> meses, Sort sort);
+
   Optional<BalanceFondoMO> findByFondoIdAndAnioAndMes(String fondoId, Integer anio, Integer mes);
 }

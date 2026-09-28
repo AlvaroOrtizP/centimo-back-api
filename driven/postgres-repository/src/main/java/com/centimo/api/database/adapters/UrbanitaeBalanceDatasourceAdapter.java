@@ -34,6 +34,13 @@ public class UrbanitaeBalanceDatasourceAdapter implements UrbanitaeBalanceDriven
   }
 
   @Override
+  public List<UrbanitaeBalance> findByMesIn(List<String> meses) {
+    return urbanitaeBalanceRepository.findByMesIn(meses).stream()
+        .map(mapper::toDomain)
+        .toList();
+  }
+
+  @Override
   public List<UrbanitaeBalance> findAll(Integer limit, String order) {
     int size = limit != null && limit > 0 ? limit : LIMITE_POR_DEFECTO;
     Sort.Direction direction = "asc".equalsIgnoreCase(order)

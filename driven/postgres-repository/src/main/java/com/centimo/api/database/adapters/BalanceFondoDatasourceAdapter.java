@@ -32,6 +32,14 @@ public class BalanceFondoDatasourceAdapter implements FundBalanceDrivenPort {
   }
 
   @Override
+  public List<BalanceFondo> findByAnioInAndMesIn(List<Integer> anios, List<Integer> meses) {
+    Sort sort = Sort.by(Sort.Direction.ASC, "anio", "mes", "fondoId");
+    return balanceFondoRepository.findByAnioInAndMesIn(anios, meses, sort).stream()
+        .map(mapper::toDomain)
+        .toList();
+  }
+
+  @Override
   public Optional<BalanceFondo> findById(String id) {
     return balanceFondoRepository.findById(id).map(mapper::toDomain);
   }

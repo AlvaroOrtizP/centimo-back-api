@@ -11,6 +11,8 @@ public interface UrbanitaeBalanceDrivenPort {
 
   Optional<UrbanitaeBalance> findByMes(String mes);
 
+  List<UrbanitaeBalance> findByMesIn(List<String> meses);
+
   List<UrbanitaeBalance> findAll(Integer limit, String order);
 
   UrbanitaeBalance guardar(UrbanitaeBalance balance);
