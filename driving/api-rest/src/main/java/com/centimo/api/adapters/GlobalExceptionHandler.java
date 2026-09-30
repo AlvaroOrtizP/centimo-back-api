@@ -1,6 +1,7 @@
 package com.centimo.api.adapters;
 
 import com.centimo.api.domain.exception.InvalidRequestException;
+import com.centimo.api.domain.exception.ResourceNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleInvalidRequest(InvalidRequestException ex) {
         log.warn("Solicitud inválida: {}", ex.getMessage());
         return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNotFound(ResourceNotFoundException ex) {
+        log.warn("Recurso no encontrado: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
