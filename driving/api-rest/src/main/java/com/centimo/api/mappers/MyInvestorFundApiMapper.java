@@ -12,16 +12,19 @@ public interface MyInvestorFundApiMapper {
 
   @Mapping(target = "code", source = "codigoIsin")
   @Mapping(target = "name", source = "nombre")
-  MyInvestorFund toMyInvestorFund(FondoMyInvestor fondo);
+  @Mapping(target = "tipo", source = "tipo")
+  MyInvestorFund toMyInvestorFundResponse(FondoMyInvestor fondo);
 
   @Mapping(target = "codigoIsin", source = "code")
   @Mapping(target = "nombre", source = "name")
+  @Mapping(target = "tipo", source = "tipo")
   @Mapping(target = "fechaCreacion", ignore = true)
-  FondoMyInvestor toDomain(MyInvestorFundCreate create);
+  FondoMyInvestor toDomain(MyInvestorFundCreate request);
 
-  @Mapping(target = "codigoIsin", source = "code")
-  @Mapping(target = "nombre", source = "name")
   @Mapping(target = "id", ignore = true)
+  @Mapping(target = "codigoIsin", source = "code")
+  @Mapping(target = "nombre", source = "name")
+  @Mapping(target = "tipo", source = "tipo")
   @Mapping(target = "fechaCreacion", ignore = true)
-  FondoMyInvestor toDomain(MyInvestorFundUpdate update);
+  FondoMyInvestor toDomain(MyInvestorFundUpdate request);
 }

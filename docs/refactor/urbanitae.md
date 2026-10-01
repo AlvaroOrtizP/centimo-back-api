@@ -1,6 +1,6 @@
 # Entidades: Urbanitae — Balance mensual y registro de compras
 
-> **Implementado:** `false`
+> **Implementado:** `true`
 
 Entidad dedicada a Urbanitae (crowdlending inmobiliario). Dividida en dos partes, igual que Equito:
 
@@ -175,5 +175,5 @@ COMMENT ON COLUMN urbanitae_compras.fecha_actualizacion IS 'Auditoría: fecha de
 - **Capa driven**: `UrbanitaeBalanceMO`/`UrbanitaeCompraMO`, repositorios, `UrbanitaeBalanceDatasourceAdapter`/`UrbanitaeCompraDatasourceAdapter`, `UrbanitaeBalanceDatasourceMapper`/`UrbanitaeCompraDatasourceMapper`.
 - **Capa driving**: controladores implementando las APIs de swagger, `UrbanitaeBalanceApiMapper`/`UrbanitaeCompraApiMapper`.
 - **Swagger**: nuevos schemas y paths para `UrbanitaeBalance` y `UrbanitaeCompra`.
-- **Flyway**: nueva migración `V20__create_urbanitae.sql` con `urbanitae_balances` y `urbanitae_compras`.
-- **Tests**: no hay IT específico para estas entidades. `CrowdlendingIT` cubre el CRUD genérico de crowdlending (`/crowdlending`), no estas dos entidades; habrá que crear un IT dedicado (`UrbanitaeEntityIT`).
+- **Flyway**: nueva migración `V21__create_urbanitae.sql` con `urbanitae_balances` y `urbanitae_compras`.
+- **Tests**: `UrbanitaeEntityIT` para el CRUD de ambas entidades: balance (crear con defaults, upsert por `mes`, listar con `limit`/`order`, actualizar, eliminar) y compras (crear con UUID y default de rendimiento, listar filtrando por `estado` y ordenando por `fecha`, actualizar/marcar como `vendida`, eliminar).

@@ -16,35 +16,34 @@ public class MyInvestorFundUseCase implements MyInvestorFundDrivingPort {
   private final MyInvestorFundDrivenPort myInvestorFundDrivenPort;
 
   @Override
-  public List<FondoMyInvestor> listAll() {
+  public List<FondoMyInvestor> listar() {
     return myInvestorFundDrivenPort.findAll();
   }
 
   @Override
-  public FondoMyInvestor getById(String id) {
+  public FondoMyInvestor obtener(String id) {
     return myInvestorFundDrivenPort.findById(id).orElseThrow();
   }
 
   @Transactional
   @Override
-  public FondoMyInvestor create(FondoMyInvestor fondo) {
-    return myInvestorFundDrivenPort.save(fondo);
+  public FondoMyInvestor crear(FondoMyInvestor fondo) {
+    return myInvestorFundDrivenPort.guardar(fondo);
   }
 
   @Transactional
   @Override
-  public FondoMyInvestor update(String id, FondoMyInvestor fondo) {
+  public FondoMyInvestor actualizar(String id, FondoMyInvestor fondo) {
     FondoMyInvestor existente = myInvestorFundDrivenPort.findById(id).orElseThrow();
-
-    existente.setCodigoIsin(fondo.getCodigoIsin());
-    existente.setNombre(fondo.getNombre());
-
-    return myInvestorFundDrivenPort.save(existente);
+    existente.setCodigoIsin(fondo.getCodigoIsin() != null ? fondo.getCodigoIsin() : existente.getCodigoIsin());
+    existente.setNombre(fondo.getNombre() != null ? fondo.getNombre() : existente.getNombre());
+    existente.setTipo(fondo.getTipo() != null ? fondo.getTipo() : existente.getTipo());
+    return myInvestorFundDrivenPort.guardar(existente);
   }
 
   @Transactional
   @Override
-  public void delete(String id) {
-    myInvestorFundDrivenPort.delete(id);
+  public void eliminar(String id) {
+    myInvestorFundDrivenPort.eliminar(id);
   }
 }

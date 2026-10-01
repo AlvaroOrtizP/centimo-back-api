@@ -26,42 +26,39 @@ public class MyInvestorFundsController implements MyInvestorFundsApi {
   @Override
   public ResponseEntity<List<MyInvestorFund>> listMyInvestorFunds() {
     log.info("listMyInvestorFunds");
-    List<MyInvestorFund> fondos = myInvestorFundDrivingPort.listAll()
-            .stream()
-            .map(mapper::toMyInvestorFund)
-            .toList();
+    List<MyInvestorFund> fondos = myInvestorFundDrivingPort.listar().stream()
+        .map(mapper::toMyInvestorFundResponse)
+        .toList();
     return ResponseEntity.ok(fondos);
-  }
-
-  @Override
-  public ResponseEntity<MyInvestorFund> getMyInvestorFund(String id) {
-    log.info("getMyInvestorFund id={}", id);
-    FondoMyInvestor fondo = myInvestorFundDrivingPort.getById(id);
-    return ResponseEntity.ok(mapper.toMyInvestorFund(fondo));
   }
 
   @Override
   public ResponseEntity<MyInvestorFund> createMyInvestorFund(MyInvestorFundCreate myInvestorFundCreate) {
     log.info("createMyInvestorFund");
     FondoMyInvestor modeloEntrada = mapper.toDomain(myInvestorFundCreate);
-    FondoMyInvestor modeloCreado = myInvestorFundDrivingPort.create(modeloEntrada);
-    MyInvestorFund response = mapper.toMyInvestorFund(modeloCreado);
-    return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    FondoMyInvestor modeloCreado = myInvestorFundDrivingPort.crear(modeloEntrada);
+    return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toMyInvestorFundResponse(modeloCreado));
+  }
+
+  @Override
+  public ResponseEntity<MyInvestorFund> getMyInvestorFund(String id) {
+    log.info("getMyInvestorFund id={}", id);
+    FondoMyInvestor modelo = myInvestorFundDrivingPort.obtener(id);
+    return ResponseEntity.ok(mapper.toMyInvestorFundResponse(modelo));
   }
 
   @Override
   public ResponseEntity<MyInvestorFund> updateMyInvestorFund(String id, MyInvestorFundUpdate myInvestorFundUpdate) {
     log.info("updateMyInvestorFund id={}", id);
     FondoMyInvestor modeloEntrada = mapper.toDomain(myInvestorFundUpdate);
-    FondoMyInvestor modeloActualizado = myInvestorFundDrivingPort.update(id, modeloEntrada);
-    MyInvestorFund response = mapper.toMyInvestorFund(modeloActualizado);
-    return ResponseEntity.ok(response);
+    FondoMyInvestor modeloActualizado = myInvestorFundDrivingPort.actualizar(id, modeloEntrada);
+    return ResponseEntity.ok(mapper.toMyInvestorFundResponse(modeloActualizado));
   }
 
   @Override
   public ResponseEntity<Void> deleteMyInvestorFund(String id) {
     log.info("deleteMyInvestorFund id={}", id);
-    myInvestorFundDrivingPort.delete(id);
+    myInvestorFundDrivingPort.eliminar(id);
     return ResponseEntity.noContent().build();
   }
 }

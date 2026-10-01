@@ -17,8 +17,10 @@ public interface FundBalanceApiMapper {
   @Mapping(target = "income", source = "intereses")
   @Mapping(target = "contribution", source = "aportacion")
   @Mapping(target = "expenses", source = "retirada")
-  FundBalance toFundBalance(BalanceFondo balance);
+  FundBalance toFundBalanceResponse(BalanceFondo balance);
 
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "fechaCreacion", ignore = true)
   @Mapping(target = "fondoId", source = "fundId")
   @Mapping(target = "anio", source = "year")
   @Mapping(target = "mes", source = "month")
@@ -26,18 +28,16 @@ public interface FundBalanceApiMapper {
   @Mapping(target = "intereses", source = "income")
   @Mapping(target = "aportacion", source = "contribution")
   @Mapping(target = "retirada", source = "expenses")
-  @Mapping(target = "id", ignore = true)
-  @Mapping(target = "fechaCreacion", ignore = true)
-  BalanceFondo toDomain(FundBalanceCreate create);
+  BalanceFondo toDomain(FundBalanceCreate request);
 
-  @Mapping(target = "saldo", source = "balance")
-  @Mapping(target = "intereses", source = "income")
-  @Mapping(target = "aportacion", source = "contribution")
-  @Mapping(target = "retirada", source = "expenses")
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "fondoId", ignore = true)
   @Mapping(target = "anio", ignore = true)
   @Mapping(target = "mes", ignore = true)
   @Mapping(target = "fechaCreacion", ignore = true)
-  BalanceFondo toDomain(FundBalanceUpdate update);
+  @Mapping(target = "saldo", source = "balance")
+  @Mapping(target = "intereses", source = "income")
+  @Mapping(target = "aportacion", source = "contribution")
+  @Mapping(target = "retirada", source = "expenses")
+  BalanceFondo toDomain(FundBalanceUpdate request);
 }

@@ -2,7 +2,7 @@ package com.centimo.api.adapters;
 
 import com.centimo.api.NominaApi;
 import com.centimo.api.domain.models.Nomina;
-import com.centimo.api.dto.NominaCreate;
+import com.centimo.api.dto.NominaRequest;
 import com.centimo.api.dto.NominaResponse;
 import com.centimo.api.mappers.NominaApiMapper;
 import com.centimo.api.ports.driving.NominaDrivingPort;
@@ -17,35 +17,33 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class NominaController implements NominaApi {
 
-    private final NominaDrivingPort nominaDrivingPort;
-    private final NominaApiMapper mapper;
+  private final NominaDrivingPort nominaDrivingPort;
+  private final NominaApiMapper mapper;
 
-    /*
-     * Nominas -> distribucion mensual
-     *      Se llama al entrar para comprobar si ya existe una nomima en ese mes-anio
-     */
-    @Override
-    public ResponseEntity<NominaResponse> getNominaAndDate(
-            Integer year,
-            Integer month) {
-        log.info("getNominaAndDate");
-        return nominaDrivingPort.obtenerPorFecha(year, month)
-                .map(mapper::toNominaResponse)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
+  @Override
+  public ResponseEntity<NominaResponse> getNomina(String mes) {
+    log.info("getNomina mes={}", mes);
+    return ResponseEntity.of(nominaDrivingPort.obtener(mes).map(mapper::toNominaResponse));
+  }
 
-    /*
-     * Nomina -> distribucion mensual
-     *      Permite crear un nuevo registro para ese mes / nomina
-     */
-    @Override
-    public ResponseEntity<NominaResponse> createNomina(NominaCreate nominaCreate) {
-        log.info("createNomina");
-        Nomina modeloEntrada = mapper.toDomain(nominaCreate);
-        Nomina modeloCreado = nominaDrivingPort.crear(modeloEntrada);
-        NominaResponse response = mapper.toNominaResponse(modeloCreado);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
+  @Override
+  public ResponseEntity<NominaResponse> createNomina(NominaRequest nominaRequest) {
+    log.info("createNomina");
+    Nomina modeloCreado = nominaDrivingPort.guardar(mapper.toDomain(nominaRequest));
+    return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toNominaResponse(modeloCreado));
+  }
 
+  @Override
+  public ResponseEntity<NominaResponse> updateNomina(String mes, NominaRequest nominaRequest) {
+    log.info("updateNomina mes={}", mes);
+    Nomina modeloActualizado = nominaDrivingPort.actualizar(mes, mapper.toDomain(nominaRequest));
+    return ResponseEntity.ok(mapper.toNominaResponse(modeloActualizado));
+  }
+
+  @Override
+  public ResponseEntity<Void> deleteNomina(String mes) {
+    log.info("deleteNomina mes={}", mes);
+    nominaDrivingPort.eliminar(mes);
+    return ResponseEntity.noContent().build();
+  }
 }

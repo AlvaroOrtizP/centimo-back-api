@@ -1,6 +1,6 @@
 # Entidad: BancoBalance — Balance mensual por banco
 
-> **Implementado:** `false`
+> **Implementado:** `true`
 
 Entidad dedicada a los bancos (BBVA, CaixaBank...). Una fila por banco y mes: el balance a final de mes y el aporte hecho ese mes. No hay bloque de Hacienda (se mantiene simple, estilo `mintos` pero sin retenciones).
 
@@ -98,5 +98,5 @@ Obtener la lista de balances, filtrada por banco y ordenada con un número máxi
 - **Capa driven**: `BancoBalanceMO`, `BancoBalanceRepository`, `BancoBalanceDatasourceAdapter`, `BancoBalanceDatasourceMapper`.
 - **Capa driving**: controlador implementando `BancoBalanceApi` (swagger), `BancoBalanceApiMapper`.
 - **Swagger**: nuevos schemas y paths para la entidad (CRUD de `BancoBalance`).
-- **Flyway**: nueva migración `V22__create_banco_balances.sql`.
-- **Tests**: no hay IT específico de esta entidad. Hay IT de pantallas bancarias (`BancoIT` sobre BBVA/CaixaBank con snapshots); se podrá ampliar con un `BancoBalanceIT` para el CRUD mensual.
+- **Flyway**: nueva migración `V20__create_banco_balances.sql`.
+- **Tests**: `BancoBalanceIT` para el CRUD de la entidad (crear con defaults, upsert por `(entidad, mes)`, listar filtrando por `entidad` con `limit`/`order`, actualizar y eliminar).

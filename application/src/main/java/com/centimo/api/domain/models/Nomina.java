@@ -16,10 +16,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Nomina {
 
-  private String id;
-  private Integer anio;
-  private Integer mes;
-  private BigDecimal valor;
+  private String mes;
+  private BigDecimal cantidad;
   private String nota;
   private LocalDateTime fechaCreacion;
   private LocalDateTime fechaActualizacion;

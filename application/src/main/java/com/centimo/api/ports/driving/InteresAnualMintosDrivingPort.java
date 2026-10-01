@@ -4,13 +4,10 @@ import com.centimo.api.domain.models.InteresAnualMintos;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface InteresAnualMintosDrivingPort {
 
-  Optional<InteresAnualMintos> obtenerPorAnio(Integer anio);
-
-  List<InteresAnualMintos> listarTodos();
+  List<InteresAnualMintos> listar(String mes);
 
   @Transactional
   InteresAnualMintos crear(InteresAnualMintos interes);

@@ -1,275 +1,287 @@
 package com.centimo.api.it;
 
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
+import com.centimo.api.it.support.StatisticsAssert;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.jdbc.Sql;
+
+import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc(addFilters = false)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Sql(scripts = "/it/b100/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@DisplayName("B100 — CRUD de balances por subcuenta")
 class B100IT extends AbstractIntegrationIT {
 
-    /**
-     * Test de integracion de la pantalla B100 (plataformas + cuentas + instantaneas):
-     * 1. Comprobar tablas vacias
-     * 2. Crear registro en B100 Save + instantanea mensual
-     * 3. Crear registro en B100 Heal + instantanea mensual
-     * 4. Comprobar tablas
-     * 5. Editar ambos registros
-     * 6. Comprobar tablas
-     * 7. Eliminar registro
-     * 8. Comprobar tablas
-     */
+  private static final String BASE = "/api/v1/b100-balances";
+  private static final String ENTIDAD = "com.centimo.api.database.models.B100BalanceMO";
 
-    private static final String PLATAFORMA_ID = "b100-it";
-    private static final String SAVE_CUENTA_ID = "b100-it-save";
-    private static final String HEAL_CUENTA_ID = "b100-it-heal";
+  @Autowired
+  private JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+  @Nested
+  @DisplayName("POST /b100-balances (upsert por subcuenta y mes)")
+  class Crear {
 
     @Test
-    @Order(1)
-    void tablasVacias(CapturedOutput capturedOutput) throws Exception {
-        Integer plataformasCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM plataformas", Integer.class);
-        Integer cuentasCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cuentas", Integer.class);
+    @DisplayName("crea la fila con id natural y aplica defaults en campos opcionales")
+    void creaConIdNaturalYDefaults() throws Exception {
+      mockMvc.perform(post(BASE)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content("""
+                  {
+                    "tipoSubcuenta": "save",
+                    "mes": "2026-01",
+                    "balanceMensual": 100.50,
+                    "dineroTotalRepartir": 200.00
+                  }
+                  """))
+          .andExpect(status().isCreated())
+          .andExpect(jsonPath("$.id").value("save-2026-01"))
+          .andExpect(jsonPath("$.tipoSubcuenta").value("save"))
+          .andExpect(jsonPath("$.mes").value("2026-01"))
+          .andExpect(jsonPath("$.balanceMensual").value(100.5))
+          .andExpect(jsonPath("$.aporteMensual").value(0.0))
+          .andExpect(jsonPath("$.dineroHacienda").value(0.0))
+          .andExpect(jsonPath("$.porcentajeHacienda").value(19.0))
+          .andExpect(jsonPath("$.dineroTotalRepartir").value(200.0));
 
-        assertThat(plataformasCount).isZero();
-        assertThat(cuentasCount).isZero();
+      var row = jdbcTemplate.queryForMap(
+          "SELECT tipo_subcuenta, mes, balance_mensual, aporte_mensual, dinero_hacienda, "
+              + "dinero_total_repartir, porcentaje_hacienda FROM b100_balances WHERE id = ?",
+          "save-2026-01");
+      assertThat(row.get("tipo_subcuenta")).isEqualTo("save");
+      assertThat(row.get("mes")).isEqualTo("2026-01");
+      assertThat((BigDecimal) row.get("balance_mensual")).isEqualByComparingTo("100.50");
+      assertThat((BigDecimal) row.get("aporte_mensual")).isEqualByComparingTo("0.00");
+      assertThat((BigDecimal) row.get("dinero_hacienda")).isEqualByComparingTo("0.00");
+      assertThat((BigDecimal) row.get("dinero_total_repartir")).isEqualByComparingTo("200.00");
+      assertThat((BigDecimal) row.get("porcentaje_hacienda")).isEqualByComparingTo("19.00");
+      assertThat(jdbcTemplate.queryForObject(
+          "SELECT fecha_creacion IS NOT NULL FROM b100_balances WHERE id = ?", Boolean.class, "save-2026-01"))
+          .isTrue();
+
+      StatisticsAssert.assertThat(statistics())
+          .forEntity(ENTIDAD)
+          .hasInsertCount(1)
+          .verify();
     }
 
     @Test
-    @Order(2)
-    void crearB100Save(CapturedOutput capturedOutput) throws Exception {
-        jdbcTemplate.update(
-            "INSERT INTO plataformas (id, nombre, tipo, color, icono, orden) VALUES (?, ?, ?, ?, ?, ?)",
-            PLATAFORMA_ID, "B100 IT", "banco", "#6C3FD1", "smartphone", 1);
-
-        jdbcTemplate.update(
-            "INSERT INTO cuentas (id, plataforma_id, nombre, tipo, moneda, orden) VALUES (?, ?, ?, ?, ?, ?)",
-            SAVE_CUENTA_ID, PLATAFORMA_ID, "Save", "ahorro", "EUR", 1);
-
-        mockMvc.perform(post("/snapshots/upsert")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {
-                      "accountId": "%s",
-                      "year": 2026,
-                      "month": 7,
-                      "balance": 1500.00,
-                      "incomeDelta": 0,
-                      "expenses": 200.00,
-                      "contribution": 300.00
-                    }
-                    """.formatted(SAVE_CUENTA_ID)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.accountId").value(SAVE_CUENTA_ID))
-            .andExpect(jsonPath("$.balance").value(1500.00));
+    @DisplayName("respeta los opcionales enviados")
+    void respetaOpcionales() throws Exception {
+      mockMvc.perform(post(BASE)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content("""
+                  {
+                    "tipoSubcuenta": "health",
+                    "mes": "2026-02",
+                    "balanceMensual": 50.00,
+                    "aporteMensual": 25.00,
+                    "dineroHacienda": 4.75,
+                    "porcentajeHacienda": 19.00,
+                    "dineroTotalRepartir": 150.00
+                  }
+                  """))
+          .andExpect(status().isCreated())
+          .andExpect(jsonPath("$.id").value("health-2026-02"))
+          .andExpect(jsonPath("$.aporteMensual").value(25.0))
+          .andExpect(jsonPath("$.dineroHacienda").value(4.75))
+          .andExpect(jsonPath("$.porcentajeHacienda").value(19.0));
     }
 
     @Test
-    @Order(3)
-    void crearB100Heal(CapturedOutput capturedOutput) throws Exception {
-        jdbcTemplate.update(
-            "INSERT INTO cuentas (id, plataforma_id, nombre, tipo, moneda, orden) VALUES (?, ?, ?, ?, ?, ?)",
-            HEAL_CUENTA_ID, PLATAFORMA_ID, "Health", "inversion", "EUR", 2);
+    @DisplayName("repetir (subcuenta, mes) actualiza la fila sin duplicar y conserva fecha_creacion")
+    void upsertNoDuplica() throws Exception {
+      crear("save", "2026-03", 10.00, 100.00);
 
-        mockMvc.perform(post("/snapshots/upsert")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {
-                      "accountId": "%s",
-                      "year": 2026,
-                      "month": 7,
-                      "balance": 800.00,
-                      "incomeDelta": 0,
-                      "expenses": 50.00,
-                      "contribution": 100.00
-                    }
-                    """.formatted(HEAL_CUENTA_ID)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.accountId").value(HEAL_CUENTA_ID))
-            .andExpect(jsonPath("$.balance").value(800.00));
+      var fechaCreacionOriginal = jdbcTemplate.queryForObject(
+          "SELECT fecha_creacion FROM b100_balances WHERE id = ?", Object.class, "save-2026-03");
+
+      mockMvc.perform(post(BASE)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content("""
+                  {
+                    "tipoSubcuenta": "save",
+                    "mes": "2026-03",
+                    "balanceMensual": 99.99,
+                    "dineroTotalRepartir": 300.00
+                  }
+                  """))
+          .andExpect(status().isCreated())
+          .andExpect(jsonPath("$.id").value("save-2026-03"))
+          .andExpect(jsonPath("$.balanceMensual").value(99.99));
+
+      assertThat(countRows()).isEqualTo(1);
+      assertThat(jdbcTemplate.queryForObject(
+          "SELECT balance_mensual FROM b100_balances WHERE id = ?", BigDecimal.class, "save-2026-03"))
+          .isEqualByComparingTo("99.99");
+      assertThat(jdbcTemplate.queryForObject(
+          "SELECT fecha_creacion FROM b100_balances WHERE id = ?", Object.class, "save-2026-03"))
+          .isEqualTo(fechaCreacionOriginal);
+
+      StatisticsAssert.assertThat(statistics())
+          .forEntity(ENTIDAD)
+          .hasInsertCount(1)
+          .hasUpdateCount(1)
+          .hasLoadCount(1)
+          .verify();
+    }
+  }
+
+  @Nested
+  @DisplayName("GET /b100-balances")
+  class Listar {
+
+    @Test
+    @DisplayName("por defecto devuelve los meses ≤ mes de la subcuenta pedida, ordenados desc")
+    void listaDescendentePorDefecto() throws Exception {
+      crear("save", "2026-01", 1.00, 10.00);
+      crear("save", "2026-02", 2.00, 20.00);
+      crear("save", "2026-03", 3.00, 30.00);
+      crear("save", "2026-04", 4.00, 40.00);
+      crear("health", "2026-05", 5.00, 50.00);
+
+      mockMvc.perform(get(BASE).param("tipoSubcuenta", "save").param("mes", "2026-03"))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.length()").value(3))
+          .andExpect(jsonPath("$[0].mes").value("2026-03"))
+          .andExpect(jsonPath("$[1].mes").value("2026-02"))
+          .andExpect(jsonPath("$[2].mes").value("2026-01"));
     }
 
     @Test
-    @Order(4)
-    void comprobarTablas(CapturedOutput capturedOutput) throws Exception {
-        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM plataformas", Integer.class)).isOne();
-        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cuentas", Integer.class)).isEqualTo(2);
-        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM instantaneas_mensuales", Integer.class)).isEqualTo(2);
+    @DisplayName("order=asc devuelve los meses ≥ mes y limit recorta el resultado")
+    void listaAscendenteConLimite() throws Exception {
+      crear("save", "2026-01", 1.00, 10.00);
+      crear("save", "2026-02", 2.00, 20.00);
+      crear("save", "2026-03", 3.00, 30.00);
 
-        String plataformaNombre = jdbcTemplate.queryForObject(
-            "SELECT nombre FROM plataformas WHERE id = ?", String.class, PLATAFORMA_ID);
-        assertThat(plataformaNombre).isEqualTo("B100 IT");
-
-        String saveNombre = jdbcTemplate.queryForObject(
-            "SELECT nombre FROM cuentas WHERE id = ?", String.class, SAVE_CUENTA_ID);
-        assertThat(saveNombre).isEqualTo("Save");
-
-        String healNombre = jdbcTemplate.queryForObject(
-            "SELECT nombre FROM cuentas WHERE id = ?", String.class, HEAL_CUENTA_ID);
-        assertThat(healNombre).isEqualTo("Health");
-
-        Float saveBalance = jdbcTemplate.queryForObject(
-            "SELECT saldo FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
-            Float.class, SAVE_CUENTA_ID, 2026, 7);
-        assertThat(saveBalance).isEqualTo(1500.00f);
-
-        Float healBalance = jdbcTemplate.queryForObject(
-            "SELECT saldo FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
-            Float.class, HEAL_CUENTA_ID, 2026, 7);
-        assertThat(healBalance).isEqualTo(800.00f);
-
-        Float saveGastos = jdbcTemplate.queryForObject(
-            "SELECT gastos FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
-            Float.class, SAVE_CUENTA_ID, 2026, 7);
-        assertThat(saveGastos).isEqualTo(200.00f);
-
-        Float saveAportacion = jdbcTemplate.queryForObject(
-            "SELECT aportacion FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
-            Float.class, SAVE_CUENTA_ID, 2026, 7);
-        assertThat(saveAportacion).isEqualTo(300.00f);
-
-        Float healGastos = jdbcTemplate.queryForObject(
-            "SELECT gastos FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
-            Float.class, HEAL_CUENTA_ID, 2026, 7);
-        assertThat(healGastos).isEqualTo(50.00f);
-
-        Float healAportacion = jdbcTemplate.queryForObject(
-            "SELECT aportacion FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
-            Float.class, HEAL_CUENTA_ID, 2026, 7);
-        assertThat(healAportacion).isEqualTo(100.00f);
+      mockMvc.perform(get(BASE).param("tipoSubcuenta", "save").param("mes", "2026-01")
+              .param("order", "asc").param("limit", "2"))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.length()").value(2))
+          .andExpect(jsonPath("$[0].mes").value("2026-01"))
+          .andExpect(jsonPath("$[1].mes").value("2026-02"));
     }
 
     @Test
-    @Order(5)
-    void editarAmbosRegistros(CapturedOutput capturedOutput) throws Exception {
-        mockMvc.perform(post("/snapshots/upsert")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {
-                      "accountId": "%s",
-                      "year": 2026,
-                      "month": 7,
-                      "balance": 1800.00,
-                      "incomeDelta": 0,
-                      "expenses": 250.00,
-                      "contribution": 350.00
-                    }
-                    """.formatted(SAVE_CUENTA_ID)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.balance").value(1800.00));
+    @DisplayName("el mes de partida filtra hacia delante con order=asc (excluye los anteriores)")
+    void mesFiltraHaciaAdelante() throws Exception {
+      crear("save", "2026-01", 1.00, 10.00);
+      crear("save", "2026-02", 2.00, 20.00);
+      crear("save", "2026-03", 3.00, 30.00);
 
-        mockMvc.perform(post("/snapshots/upsert")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {
-                      "accountId": "%s",
-                      "year": 2026,
-                      "month": 7,
-                      "balance": 950.00,
-                      "incomeDelta": 0,
-                      "expenses": 75.00,
-                      "contribution": 150.00
-                    }
-                    """.formatted(HEAL_CUENTA_ID)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.balance").value(950.00));
+      mockMvc.perform(get(BASE).param("tipoSubcuenta", "save").param("mes", "2026-02")
+              .param("order", "asc"))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.length()").value(2))
+          .andExpect(jsonPath("$[0].mes").value("2026-02"))
+          .andExpect(jsonPath("$[1].mes").value("2026-03"));
     }
 
     @Test
-    @Order(6)
-    void comprobarTablasDespuesEdicion(CapturedOutput capturedOutput) throws Exception {
-        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM plataformas", Integer.class)).isOne();
-        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cuentas", Integer.class)).isEqualTo(2);
-        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM instantaneas_mensuales", Integer.class)).isEqualTo(2);
-
-        Float saveBalance = jdbcTemplate.queryForObject(
-            "SELECT saldo FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
-            Float.class, SAVE_CUENTA_ID, 2026, 7);
-        assertThat(saveBalance).isEqualTo(1800.00f);
-
-        Float saveIngresos = jdbcTemplate.queryForObject(
-            "SELECT ingresos FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
-            Float.class, SAVE_CUENTA_ID, 2026, 7);
-        assertThat(saveIngresos).isEqualTo(0f);
-
-        Float healBalance = jdbcTemplate.queryForObject(
-            "SELECT saldo FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
-            Float.class, HEAL_CUENTA_ID, 2026, 7);
-        assertThat(healBalance).isEqualTo(950.00f);
-
-        Float healIngresos = jdbcTemplate.queryForObject(
-            "SELECT ingresos FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
-            Float.class, HEAL_CUENTA_ID, 2026, 7);
-        assertThat(healIngresos).isEqualTo(0f);
-
-        Float saveGastos = jdbcTemplate.queryForObject(
-            "SELECT gastos FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
-            Float.class, SAVE_CUENTA_ID, 2026, 7);
-        assertThat(saveGastos).isEqualTo(250.00f);
-
-        Float saveAportacion = jdbcTemplate.queryForObject(
-            "SELECT aportacion FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
-            Float.class, SAVE_CUENTA_ID, 2026, 7);
-        assertThat(saveAportacion).isEqualTo(350.00f);
-
-        Float healGastos = jdbcTemplate.queryForObject(
-            "SELECT gastos FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
-            Float.class, HEAL_CUENTA_ID, 2026, 7);
-        assertThat(healGastos).isEqualTo(75.00f);
-
-        Float healAportacion = jdbcTemplate.queryForObject(
-            "SELECT aportacion FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
-            Float.class, HEAL_CUENTA_ID, 2026, 7);
-        assertThat(healAportacion).isEqualTo(150.00f);
+    @DisplayName("sin datos devuelve lista vacía")
+    void listaVacia() throws Exception {
+      mockMvc.perform(get(BASE).param("tipoSubcuenta", "save").param("mes", "2026-01"))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.length()").value(0));
     }
 
     @Test
-    @Order(7)
-    void eliminarRegistro(CapturedOutput capturedOutput) throws Exception {
-        Integer instantaneasBefore = jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM instantaneas_mensuales WHERE cuenta_id = ?",
-            Integer.class, HEAL_CUENTA_ID);
-        assertThat(instantaneasBefore).isOne();
-
-        jdbcTemplate.update("DELETE FROM instantaneas_mensuales WHERE cuenta_id = ?", HEAL_CUENTA_ID);
-        jdbcTemplate.update("DELETE FROM cuentas WHERE id = ?", HEAL_CUENTA_ID);
+    @DisplayName("tipo de subcuenta inválido devuelve 400")
+    void tipoInvalido() throws Exception {
+      mockMvc.perform(get(BASE).param("tipoSubcuenta", "inexistente").param("mes", "2026-01"))
+          .andExpect(status().isBadRequest());
     }
+  }
+
+  @Nested
+  @DisplayName("PUT /b100-balances/{id}")
+  class Actualizar {
 
     @Test
-    @Order(8)
-    void comprobarTablasDespuesEliminacion(CapturedOutput capturedOutput) throws Exception {
-        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM plataformas", Integer.class)).isOne();
-        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cuentas", Integer.class)).isOne();
-        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM instantaneas_mensuales", Integer.class)).isOne();
+    @DisplayName("actualiza los campos enviados y conserva los opcionales omitidos")
+    void actualizaCamposEnviados() throws Exception {
+      crear("health", "2026-04", 100.00, 500.00, 40.00, 8.00, 19.00);
 
-        String saveNombre = jdbcTemplate.queryForObject(
-            "SELECT nombre FROM cuentas WHERE id = ?", String.class, SAVE_CUENTA_ID);
-        assertThat(saveNombre).isEqualTo("Save");
+      mockMvc.perform(put(BASE + "/health-2026-04")
+              .contentType(MediaType.APPLICATION_JSON)
+              .content("""
+                  {
+                    "tipoSubcuenta": "health",
+                    "mes": "2026-04",
+                    "balanceMensual": 123.45,
+                    "dineroTotalRepartir": 900.00
+                  }
+                  """))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.id").value("health-2026-04"))
+          .andExpect(jsonPath("$.balanceMensual").value(123.45))
+          .andExpect(jsonPath("$.dineroTotalRepartir").value(900.0))
+          .andExpect(jsonPath("$.aporteMensual").value(40.0))
+          .andExpect(jsonPath("$.dineroHacienda").value(8.0))
+          .andExpect(jsonPath("$.porcentajeHacienda").value(19.0));
 
-        Float saveBalance = jdbcTemplate.queryForObject(
-            "SELECT saldo FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
-            Float.class, SAVE_CUENTA_ID, 2026, 7);
-        assertThat(saveBalance).isEqualTo(1800.00f);
-
-        Float saveIngresos = jdbcTemplate.queryForObject(
-            "SELECT ingresos FROM instantaneas_mensuales WHERE cuenta_id = ? AND anio = ? AND mes = ?",
-            Float.class, SAVE_CUENTA_ID, 2026, 7);
-        assertThat(saveIngresos).isEqualTo(0f);
-
-        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM gastos", Integer.class)).isZero();
-        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM nomina", Integer.class)).isZero();
+      assertThat(countRows()).isEqualTo(1);
     }
+  }
+
+  @Nested
+  @DisplayName("DELETE /b100-balances/{id}")
+  class Eliminar {
+
+    @Test
+    @DisplayName("elimina la fila indicada")
+    void elimina() throws Exception {
+      crear("save", "2026-06", 10.00, 100.00);
+      assertThat(countRows()).isEqualTo(1);
+
+      mockMvc.perform(delete(BASE + "/save-2026-06"))
+          .andExpect(status().isNoContent());
+
+      assertThat(countRows()).isZero();
+
+      StatisticsAssert.assertThat(statistics())
+          .forEntity(ENTIDAD)
+          .hasInsertCount(1)
+          .hasDeleteCount(1)
+          .hasLoadCount(1)
+          .verify();
+    }
+  }
+
+  private void crear(String tipoSubcuenta, String mes, double balance, double totalRepartir) throws Exception {
+    mockMvc.perform(post(BASE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {"tipoSubcuenta":"%s","mes":"%s","balanceMensual":%s,"dineroTotalRepartir":%s}
+                """.formatted(tipoSubcuenta, mes, balance, totalRepartir)))
+        .andExpect(status().isCreated());
+  }
+
+  private void crear(String tipoSubcuenta, String mes, double balance, double totalRepartir,
+                     double aporte, double hacienda, double porcentaje) throws Exception {
+    mockMvc.perform(post(BASE)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {"tipoSubcuenta":"%s","mes":"%s","balanceMensual":%s,"dineroTotalRepartir":%s,
+                 "aporteMensual":%s,"dineroHacienda":%s,"porcentajeHacienda":%s}
+                """.formatted(tipoSubcuenta, mes, balance, totalRepartir, aporte, hacienda, porcentaje)))
+        .andExpect(status().isCreated());
+  }
+
+  private int countRows() {
+    return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM b100_balances", Integer.class);
+  }
 }

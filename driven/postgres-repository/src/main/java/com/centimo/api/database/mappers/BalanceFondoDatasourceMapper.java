@@ -11,5 +11,6 @@ public interface BalanceFondoDatasourceMapper {
   @Mapping(target = "fondoId", expression = "java(mo.getFondo() != null ? mo.getFondo().getId() : null)")
   BalanceFondo toDomain(BalanceFondoMO mo);
 
+  @Mapping(target = "fondo", ignore = true)
   BalanceFondoMO toEntity(BalanceFondo balance);
 }

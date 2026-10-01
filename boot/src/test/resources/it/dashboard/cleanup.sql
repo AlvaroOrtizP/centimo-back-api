@@ -1,0 +1,9 @@
+DELETE FROM balances_fondo;
+DELETE FROM fondos_myinvestor;
+DELETE FROM banco_balances;
+DELETE FROM b100_balances;
+DELETE FROM mintos;
+DELETE FROM urbanitae_balances;
+DELETE FROM equito_balances;
+DELETE FROM revolut_balances;
+DELETE FROM gastos;

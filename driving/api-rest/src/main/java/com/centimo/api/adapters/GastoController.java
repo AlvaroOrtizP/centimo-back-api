@@ -20,51 +20,41 @@ import java.util.List;
 @Slf4j
 public class GastoController implements ExpensesApi {
 
-    private final GastoDrivingPort gastoDrivingPort;
-    private final GastoApiMapper mapper;
+  private final GastoDrivingPort gastoDrivingPort;
+  private final GastoApiMapper mapper;
 
-    @Override
-    public ResponseEntity<List<Expense>> listExpenses(String snapshotId, Integer year, Integer month) {
-        log.info("listExpenses snapshotId={} year={} month={}", snapshotId, year, month);
-        List<Expense> gastos;
-        if (snapshotId != null && !snapshotId.isBlank()) {
-            gastos = gastoDrivingPort.listarPorInstantanea(snapshotId)
-                    .stream()
-                    .map(mapper::toExpense)
-                    .toList();
-        } else if (year != null && month != null) {
-            gastos = gastoDrivingPort.listarPorPeriodo(year, month)
-                    .stream()
-                    .map(mapper::toExpense)
-                    .toList();
-        } else {
-            gastos = List.of();
-        }
-        return ResponseEntity.ok(gastos);
+  @Override
+  public ResponseEntity<List<Expense>> listExpenses(Integer year, Integer month, String order) {
+    log.info("listExpenses year={} month={} order={}", year, month, order);
+    if (month != null && year == null) {
+      return ResponseEntity.badRequest().build();
     }
+    List<Expense> gastos = gastoDrivingPort.listar(year, month, order).stream()
+        .map(mapper::toExpense)
+        .toList();
+    return ResponseEntity.ok(gastos);
+  }
 
-    @Override
-    public ResponseEntity<Expense> createExpense(ExpenseCreate expenseCreate) {
-        log.info("createExpense");
-        Gasto modeloEntrada = mapper.toDomain(expenseCreate);
-        Gasto modeloCreado = gastoDrivingPort.crear(modeloEntrada);
-        Expense response = mapper.toExpense(modeloCreado);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
+  @Override
+  public ResponseEntity<Expense> createExpense(ExpenseCreate expenseCreate) {
+    log.info("createExpense");
+    Gasto modeloEntrada = mapper.toDomain(expenseCreate);
+    Gasto modeloCreado = gastoDrivingPort.crear(modeloEntrada);
+    return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toExpense(modeloCreado));
+  }
 
-    @Override
-    public ResponseEntity<Expense> updateExpense(String id, ExpenseUpdate expenseUpdate) {
-        log.info("updateExpense id={}", id);
-        Gasto modeloEntrada = mapper.toDomain(expenseUpdate);
-        Gasto modeloActualizado = gastoDrivingPort.actualizar(id, modeloEntrada);
-        Expense response = mapper.toExpense(modeloActualizado);
-        return ResponseEntity.ok(response);
-    }
+  @Override
+  public ResponseEntity<Expense> updateExpense(String id, ExpenseUpdate expenseUpdate) {
+    log.info("updateExpense id={}", id);
+    Gasto modeloEntrada = mapper.toDomain(expenseUpdate);
+    Gasto modeloActualizado = gastoDrivingPort.actualizar(id, modeloEntrada);
+    return ResponseEntity.ok(mapper.toExpense(modeloActualizado));
+  }
 
-    @Override
-    public ResponseEntity<Void> deleteExpense(String id, String snapshotId) {
-        log.info("deleteExpense id={} snapshotId={}", id, snapshotId);
-        gastoDrivingPort.eliminar(id, snapshotId);
-        return ResponseEntity.noContent().build();
-    }
+  @Override
+  public ResponseEntity<Void> deleteExpense(String id) {
+    log.info("deleteExpense id={}", id);
+    gastoDrivingPort.eliminar(id);
+    return ResponseEntity.noContent().build();
+  }
 }

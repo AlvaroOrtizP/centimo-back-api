@@ -7,14 +7,14 @@ import java.util.List;
 
 public interface FundBalanceDrivingPort {
 
-  List<BalanceFondo> listByYearAndMonth(Integer anio, Integer mes);
+  List<BalanceFondo> listarPorMes(Integer anio, Integer mes);
 
   @Transactional
-  BalanceFondo create(BalanceFondo balance);
+  BalanceFondo crear(BalanceFondo balance);
 
   @Transactional
-  BalanceFondo update(String id, BalanceFondo balance);
+  BalanceFondo actualizar(String id, BalanceFondo balance);
 
   @Transactional
-  void delete(String id);
+  void eliminar(String id);
 }

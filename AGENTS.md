@@ -82,6 +82,8 @@ Ejemplo de dominio CRUD de referencia: **Gasto** (create/update/delete). **Crowd
 - `V7` asignaciones_salario, compromisos
 - `V8` nomina
 - `V9`/`V10` seeds de cuentas (bbva-checking, urbanitae)
+- `V17` **b100_balances** (sustituye al modelo genérico para B100)
+- `V18` **elimina el modelo antiguo de B100** (plataforma `b100`, cuentas `b100-*`, instantáneas)
 
 ## Tests de Integración
 

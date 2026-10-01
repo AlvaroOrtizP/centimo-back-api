@@ -1,5 +1,6 @@
 package com.centimo.api.domain.models;
 
+import com.centimo.api.domain.enums.ExpenseCategory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,8 +19,7 @@ import java.time.LocalDateTime;
 public class Gasto {
 
   private String id;
-  private String instantaneaId;
-  private String categoria;
+  private ExpenseCategory categoria;
   private BigDecimal cantidad;
   private LocalDate fecha;
   private String descripcion;

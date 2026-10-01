@@ -26,10 +26,9 @@ public class FundBalancesController implements FundBalancesApi {
   @Override
   public ResponseEntity<List<FundBalance>> listFundBalances(Integer year, Integer month) {
     log.info("listFundBalances year={} month={}", year, month);
-    List<FundBalance> balances = fundBalanceDrivingPort.listByYearAndMonth(year, month)
-            .stream()
-            .map(mapper::toFundBalance)
-            .toList();
+    List<FundBalance> balances = fundBalanceDrivingPort.listarPorMes(year, month).stream()
+        .map(mapper::toFundBalanceResponse)
+        .toList();
     return ResponseEntity.ok(balances);
   }
 
@@ -37,24 +36,22 @@ public class FundBalancesController implements FundBalancesApi {
   public ResponseEntity<FundBalance> createFundBalance(FundBalanceCreate fundBalanceCreate) {
     log.info("createFundBalance");
     BalanceFondo modeloEntrada = mapper.toDomain(fundBalanceCreate);
-    BalanceFondo modeloCreado = fundBalanceDrivingPort.create(modeloEntrada);
-    FundBalance response = mapper.toFundBalance(modeloCreado);
-    return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    BalanceFondo modeloCreado = fundBalanceDrivingPort.crear(modeloEntrada);
+    return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toFundBalanceResponse(modeloCreado));
   }
 
   @Override
   public ResponseEntity<FundBalance> updateFundBalance(String id, FundBalanceUpdate fundBalanceUpdate) {
     log.info("updateFundBalance id={}", id);
     BalanceFondo modeloEntrada = mapper.toDomain(fundBalanceUpdate);
-    BalanceFondo modeloActualizado = fundBalanceDrivingPort.update(id, modeloEntrada);
-    FundBalance response = mapper.toFundBalance(modeloActualizado);
-    return ResponseEntity.ok(response);
+    BalanceFondo modeloActualizado = fundBalanceDrivingPort.actualizar(id, modeloEntrada);
+    return ResponseEntity.ok(mapper.toFundBalanceResponse(modeloActualizado));
   }
 
   @Override
   public ResponseEntity<Void> deleteFundBalance(String id) {
     log.info("deleteFundBalance id={}", id);
-    fundBalanceDrivingPort.delete(id);
+    fundBalanceDrivingPort.eliminar(id);
     return ResponseEntity.noContent().build();
   }
 }

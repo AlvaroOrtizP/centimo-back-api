@@ -7,11 +7,11 @@ import java.util.Optional;
 
 public interface GastoDrivenPort {
 
-  List<Gasto> findByInstantaneaId(String instantaneaId);
-
-  List<Gasto> findByAnioYMes(int year, int month);
-
   Optional<Gasto> findById(String id);
+
+  List<Gasto> findByPeriodo(Integer year, Integer month, String order);
+
+  List<Gasto> findAll(String order);
 
   Gasto guardar(Gasto gasto);
 

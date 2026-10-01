@@ -13,31 +13,26 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "nomina")
+@Table(name = "nominas")
 @Getter
 @Setter
 public class NominaMO {
-    @Id
-    @Column(length = 50)
-    private String id;
 
-    @Column(nullable = false)
-    private Integer anio;
+  @Id
+  @Column(name = "mes", length = 7)
+  private String mes;
 
-    @Column(nullable = false)
-    private Integer mes;
+  @Column(name = "cantidad", nullable = false, precision = 12, scale = 2)
+  private BigDecimal cantidad = BigDecimal.ZERO;
 
-    @Column(nullable = false, precision = 12, scale = 2)
-    private BigDecimal valor = BigDecimal.ZERO;
+  @Column(name = "nota")
+  private String nota;
 
-    @Column(name = "nota", columnDefinition = "TEXT")
-    private String nota;
+  @CreationTimestamp
+  @Column(name = "fecha_creacion", updatable = false)
+  private LocalDateTime fechaCreacion;
 
-    @CreationTimestamp
-    @Column(name = "fecha_creacion", updatable = false)
-    private LocalDateTime fechaCreacion;
-
-    @UpdateTimestamp
-    @Column(name = "fecha_actualizacion")
-    private LocalDateTime fechaActualizacion;
+  @UpdateTimestamp
+  @Column(name = "fecha_actualizacion")
+  private LocalDateTime fechaActualizacion;
 }

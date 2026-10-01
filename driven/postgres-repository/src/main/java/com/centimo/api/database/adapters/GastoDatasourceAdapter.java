@@ -2,15 +2,15 @@ package com.centimo.api.database.adapters;
 
 import com.centimo.api.database.mappers.GastoDatasourceMapper;
 import com.centimo.api.database.models.GastoMO;
-import com.centimo.api.database.models.InstantaneaMensualMO;
 import com.centimo.api.database.repositories.GastoRepository;
-import com.centimo.api.database.repositories.InstantaneaMensualRepository;
 import com.centimo.api.domain.models.Gasto;
 import com.centimo.api.ports.driven.GastoDrivenPort;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,79 +19,69 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class GastoDatasourceAdapter implements GastoDrivenPort {
 
-    private final GastoRepository gastoRepository;
-    private final InstantaneaMensualRepository instantaneaRepository;
-    private final GastoDatasourceMapper mapper;
+  private final GastoRepository gastoRepository;
+  private final GastoDatasourceMapper mapper;
 
-    @Override
-    public List<Gasto> findByInstantaneaId(String instantaneaId) {
-        return resolveInstantanea(instantaneaId)
-                .map(instantanea -> gastoRepository.findByInstantaneaId(instantanea.getId()))
-                .orElse(List.of())
-                .stream()
-                .map(mapper::toDomain)
-                .toList();
+  @Override
+  public Optional<Gasto> findById(String id) {
+    return gastoRepository.findById(id).map(mapper::toDomain);
+  }
+
+  @Override
+  public List<Gasto> findByPeriodo(Integer year, Integer month, String order) {
+    return gastoRepository.findByFechaBetween(inicioPeriodo(year, month), finPeriodo(year, month), sortPorFecha(order)).stream()
+        .map(mapper::toDomain)
+        .toList();
+  }
+
+  @Override
+  public List<Gasto> findAll(String order) {
+    return gastoRepository.findAll(sortPorFecha(order)).stream()
+        .map(mapper::toDomain)
+        .toList();
+  }
+
+  @Override
+  public Gasto guardar(Gasto gasto) {
+    GastoMO entity = gasto.getId() != null
+        ? gastoRepository.findById(gasto.getId()).orElse(mapper.toEntity(gasto))
+        : mapper.toEntity(gasto);
+
+    if (entity.getId() == null) {
+      entity.setId(UUID.randomUUID().toString());
     }
 
-    @Override
-    public List<Gasto> findByAnioYMes(int year, int month) {
-        List<String> instantaneaIds = instantaneaRepository.findByAnioAndMes(year, month).stream()
-                .map(InstantaneaMensualMO::getId)
-                .toList();
-        if (instantaneaIds.isEmpty()) {
-            return List.of();
-        }
-        return gastoRepository.findByInstantaneaIds(instantaneaIds).stream()
-                .map(mapper::toDomain)
-                .toList();
+    entity.setCategoria(gasto.getCategoria());
+    entity.setCantidad(gasto.getCantidad());
+    entity.setFecha(gasto.getFecha());
+    entity.setDescripcion(gasto.getDescripcion());
+
+    return mapper.toDomain(gastoRepository.save(entity));
+  }
+
+  @Override
+  public void eliminar(String id) {
+    gastoRepository.deleteById(id);
+  }
+
+  private Sort sortPorFecha(String order) {
+    Sort.Direction direction = "asc".equalsIgnoreCase(order)
+        ? Sort.Direction.ASC
+        : Sort.Direction.DESC;
+    return Sort.by(direction, "fecha");
+  }
+
+  private LocalDate inicioPeriodo(Integer year, Integer month) {
+    if (year == null || month == null) {
+      return year == null ? LocalDate.MIN : LocalDate.of(year, 1, 1);
     }
+    return LocalDate.of(year, month, 1);
+  }
 
-    @Override
-    public Optional<Gasto> findById(String id) {
-        return gastoRepository.findById(id).map(mapper::toDomain);
+  private LocalDate finPeriodo(Integer year, Integer month) {
+    if (year == null || month == null) {
+      return year == null ? LocalDate.MAX : LocalDate.of(year, 12, 31);
     }
-
-    @Override
-    public Gasto guardar(Gasto gasto) {
-        GastoMO entity = gasto.getId() != null
-                ? gastoRepository.findById(gasto.getId()).orElse(mapper.toEntity(gasto))
-                : mapper.toEntity(gasto);
-        if (entity.getId() == null) {
-            entity.setId(UUID.randomUUID().toString());
-        }
-        entity.setCategoria(gasto.getCategoria());
-        entity.setCantidad(gasto.getCantidad());
-        entity.setFecha(gasto.getFecha());
-        entity.setDescripcion(gasto.getDescripcion());
-
-        resolveInstantanea(gasto.getInstantaneaId()).ifPresent(entity::setInstantanea);
-
-        GastoMO saved = gastoRepository.save(entity);
-        return mapper.toDomain(saved);
-    }
-
-    @Override
-    public void eliminar(String id) {
-        gastoRepository.deleteById(id);
-    }
-
-    private Optional<InstantaneaMensualMO> resolveInstantanea(String compositeKey) {
-        if (compositeKey == null || compositeKey.isBlank()) {
-            return Optional.empty();
-        }
-        String[] parts = compositeKey.split("-");
-        if (parts.length < 3) {
-            return instantaneaRepository.findById(compositeKey);
-        }
-        String monthStr = parts[parts.length - 1];
-        String yearStr = parts[parts.length - 2];
-        String accountId = String.join("-", Arrays.copyOfRange(parts, 0, parts.length - 2));
-        try {
-            int year = Integer.parseInt(yearStr);
-            int month = Integer.parseInt(monthStr);
-            return instantaneaRepository.findByCuentaIdAndAnioAndMes(accountId, year, month);
-        } catch (NumberFormatException e) {
-            return instantaneaRepository.findById(compositeKey);
-        }
-    }
+    return YearMonth.of(year, month).atEndOfMonth();
+  }
 }

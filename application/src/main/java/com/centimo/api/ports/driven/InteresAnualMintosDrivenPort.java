@@ -7,7 +7,11 @@ import java.util.Optional;
 
 public interface InteresAnualMintosDrivenPort {
 
-  Optional<InteresAnualMintos> findByAnio(Integer anio);
+  Optional<InteresAnualMintos> findById(String id);
+
+  Optional<InteresAnualMintos> findByMes(String mes);
+
+  List<InteresAnualMintos> findByMesIn(List<String> meses);
 
   List<InteresAnualMintos> findAll();
 

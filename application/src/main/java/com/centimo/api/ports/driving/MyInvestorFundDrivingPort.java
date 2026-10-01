@@ -7,16 +7,16 @@ import java.util.List;
 
 public interface MyInvestorFundDrivingPort {
 
-  List<FondoMyInvestor> listAll();
+  List<FondoMyInvestor> listar();
 
-  FondoMyInvestor getById(String id);
-
-  @Transactional
-  FondoMyInvestor create(FondoMyInvestor fondo);
+  FondoMyInvestor obtener(String id);
 
   @Transactional
-  FondoMyInvestor update(String id, FondoMyInvestor fondo);
+  FondoMyInvestor crear(FondoMyInvestor fondo);
 
   @Transactional
-  void delete(String id);
+  FondoMyInvestor actualizar(String id, FondoMyInvestor fondo);
+
+  @Transactional
+  void eliminar(String id);
 }

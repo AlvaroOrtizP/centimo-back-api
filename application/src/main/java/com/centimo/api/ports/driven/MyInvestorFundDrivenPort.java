@@ -11,7 +11,7 @@ public interface MyInvestorFundDrivenPort {
 
   Optional<FondoMyInvestor> findById(String id);
 
-  FondoMyInvestor save(FondoMyInvestor fondo);
+  FondoMyInvestor guardar(FondoMyInvestor fondo);
 
-  void delete(String id);
+  void eliminar(String id);
 }

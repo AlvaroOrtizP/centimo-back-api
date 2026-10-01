@@ -7,9 +7,7 @@ import java.util.List;
 
 public interface GastoDrivingPort {
 
-  List<Gasto> listarPorInstantanea(String instantaneaId);
-
-  List<Gasto> listarPorPeriodo(int year, int month);
+  List<Gasto> listar(Integer year, Integer month, String order);
 
   @Transactional
   Gasto crear(Gasto gasto);
@@ -18,5 +16,5 @@ public interface GastoDrivingPort {
   Gasto actualizar(String id, Gasto gasto);
 
   @Transactional
-  void eliminar(String id, String instantaneaId);
+  void eliminar(String id);
 }

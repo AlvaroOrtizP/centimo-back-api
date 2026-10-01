@@ -1,37 +1,49 @@
 package com.centimo.api.database.adapters;
 
-import com.centimo.api.database.mappers.NominaMapper;
+import com.centimo.api.database.mappers.NominaDatasourceMapper;
 import com.centimo.api.database.models.NominaMO;
 import com.centimo.api.database.repositories.NominaRepository;
 import com.centimo.api.domain.models.Nomina;
 import com.centimo.api.ports.driven.NominaDrivenPort;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class NominaDatasourceAdapter implements NominaDrivenPort {
 
   private final NominaRepository nominaRepository;
-  private final NominaMapper mapper;
+  private final NominaDatasourceMapper mapper;
 
   @Override
-  public Optional<Nomina> findByAnioAndMes(Integer anio, Integer mes) {
-    return nominaRepository.findByAnioAndMes(anio, mes).map(mapper::toDomain);
+  public Optional<Nomina> findByMes(String mes) {
+    return nominaRepository.findByMes(mes).map(mapper::toDomain);
+  }
+
+  @Override
+  public List<Nomina> findAll() {
+    return nominaRepository.findAll(Sort.by(Sort.Direction.DESC, "mes")).stream()
+        .map(mapper::toDomain)
+        .toList();
   }
 
   @Override
   public Nomina guardar(Nomina nomina) {
-    NominaMO entity = mapper.toMO(nomina);
+    NominaMO entity = nominaRepository.findByMes(nomina.getMes())
+        .orElseGet(() -> mapper.toEntity(nomina));
 
-    if (entity.getId() == null) {
-      entity.setId(UUID.randomUUID().toString());
-    }
+    entity.setCantidad(nomina.getCantidad());
+    entity.setNota(nomina.getNota());
 
-    NominaMO savedEntity = nominaRepository.save(entity);
-    return mapper.toDomain(savedEntity);
+    return mapper.toDomain(nominaRepository.save(entity));
+  }
+
+  @Override
+  public void eliminar(String mes) {
+    nominaRepository.deleteById(mes);
   }
 }

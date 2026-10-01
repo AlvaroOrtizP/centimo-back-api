@@ -17,11 +17,9 @@ import java.time.LocalDateTime;
 public class InteresAnualMintos {
 
   private String id;
-  private Integer anio;
-  private BigDecimal cantidad;
-  private BigDecimal retencionImpuestos;
-  private BigDecimal tipoImpositivo;
-  private BigDecimal importeNeto;
+  private String mes;
+  private BigDecimal importeAñadido;
+  private BigDecimal valorFinal;
   private LocalDateTime fechaCreacion;
   private LocalDateTime fechaActualizacion;
 }

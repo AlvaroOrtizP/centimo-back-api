@@ -1,6 +1,6 @@
 # Entidad: InteresAnualMintos — Intereses de Mintos por mes
 
-> **Implementado:** `false`
+> **Implementado:** `true`
 
 Entidad dedicada a los intereses de la plataforma Mintos. **Una fila por mes-año**: cada registro guarda el valor final de la cartera de Mintos en un mes concreto (formato `YYYY-MM`, p. ej. `2026-07`), el importe añadido ese mes (el aporte extra, que puede ser 0) y una descripción opcional.
 
@@ -46,15 +46,13 @@ COMMENT ON COLUMN mintos.fecha_creacion IS 'Auditoría: fecha de creación';
 COMMENT ON COLUMN mintos.fecha_actualizacion IS 'Auditoría: fecha de última actualización';
 ```
 
-> **Adaptación pendiente:** el código y la migración `V15` actuales guardan la tabla `mintos_intereses_anuales` con `anio INTEGER NOT NULL UNIQUE`, `cantidad`, `retencion_impuestos`, `tipo_impositivo` e `importe_neto`. Hay que crear/reemplazar por la tabla `mintos` con `mes`, `importe_añadido` y `valor_final` (nueva migración o ajuste de `V15` si aún no está desplegada), incluir los `COMMENT ON COLUMN`, y ajustar dominio/entidad/repositorio/controlador a los nuevos campos.
-
 ## Endpoints
 
 ### Crear intereses de un mes (POST)
 
 | Método | Path | Body | Uso |
 |---|---|---|---|
-| POST | `/mintos/intereses-anuales` | `MintosInterestAnnualCreate` (mes `YYYY-MM`, importeAñadido, valorFinal) | Crear el registro de intereses de un mes-año |
+| POST | `/mintos/intereses-anuales` | `MintosInterestAnnualCreate` (mes `YYYY-MM`, importeAñadido, valorFinal) | Crear o actualizar el registro de intereses de un mes-año (upsert por `mes`) |
 
 ### Listar intereses (GET)
 
@@ -84,11 +82,11 @@ Obtener la lista de intereses por mes-año, opcionalmente filtrada por mes.
 - `mes` inmutable en el `UPDATE`: solo se actualizan importe añadido y valor final.
 - Patrón hexagonal del proyecto, como `InteresAnualMintos` (referencia) o `BalanceFondo`.
 
-## Capas de implementación previstas
+## Capas de implementación
 
 - **Capa de aplicación**: `InteresAnualMintos` (domain model), `InteresAnualMintosDrivingPort`, `InteresAnualMintosUseCase`, `InteresAnualMintosDrivenPort`.
 - **Capa driven**: `InteresAnualMintosMO`, `InteresAnualMintosRepository`, `InteresAnualMintosDatasourceAdapter`, `InteresAnualMintosDatasourceMapper`.
 - **Capa driving**: `InteresAnualMintosController` implementando `MintosInteresesAnualesApi` (swagger), `InteresAnualMintosApiMapper`.
 - **Swagger**: paths `/mintos/intereses-anuales` y schemas `MintosInterestAnnual`, `MintosInterestAnnualCreate` (mes `YYYY-MM`, importeAñadido, valorFinal; tag `MintosInteresesAnuales`).
-- **Flyway**: ajustar `V15__create_mintos_intereses_anuales.sql` (o nueva migración) para la tabla `mintos` con `mes`, `importe_añadido` y `valor_final`, e incluir los `COMMENT ON COLUMN`.
-- **Tests**: no existe IT específico del CRUD de esta entidad. `MintosIT` cubre la pantalla de la plataforma Mintos (plataforma + cuenta + instantáneas mensuales), no el CRUD de intereses.
+- **Flyway**: `V19__create_mintos.sql` (tabla `mintos` con `mes`, `importe_añadido` y `valor_final`, incluidos los `COMMENT ON COLUMN`).
+- **Tests**: `MintosIT` para el CRUD de la entidad (crear con default de importe añadido, upsert por `mes`, listar con filtro opcional por `mes`, actualizar sin tocar el `mes` y eliminar).

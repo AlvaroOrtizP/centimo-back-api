@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -22,8 +21,8 @@ public class FondoMyInvestorDatasourceAdapter implements MyInvestorFundDrivenPor
   @Override
   public List<FondoMyInvestor> findAll() {
     return fondoMyInvestorRepository.findAll().stream()
-            .map(mapper::toDomain)
-            .toList();
+        .map(mapper::toDomain)
+        .toList();
   }
 
   @Override
@@ -32,24 +31,20 @@ public class FondoMyInvestorDatasourceAdapter implements MyInvestorFundDrivenPor
   }
 
   @Override
-  public FondoMyInvestor save(FondoMyInvestor fondo) {
+  public FondoMyInvestor guardar(FondoMyInvestor fondo) {
     FondoMyInvestorMO entity = fondo.getId() != null
-            ? fondoMyInvestorRepository.findById(fondo.getId()).orElse(mapper.toEntity(fondo))
-            : mapper.toEntity(fondo);
-
-    if (entity.getId() == null) {
-      entity.setId(UUID.randomUUID().toString());
-    }
+        ? fondoMyInvestorRepository.findById(fondo.getId()).orElse(mapper.toEntity(fondo))
+        : mapper.toEntity(fondo);
 
     entity.setCodigoIsin(fondo.getCodigoIsin());
     entity.setNombre(fondo.getNombre());
+    entity.setTipo(fondo.getTipo());
 
-    FondoMyInvestorMO saved = fondoMyInvestorRepository.save(entity);
-    return mapper.toDomain(saved);
+    return mapper.toDomain(fondoMyInvestorRepository.save(entity));
   }
 
   @Override
-  public void delete(String id) {
+  public void eliminar(String id) {
     fondoMyInvestorRepository.deleteById(id);
   }
 }

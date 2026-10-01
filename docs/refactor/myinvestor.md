@@ -1,6 +1,6 @@
 # Entidades: MyInvestor — Activos y balances mensuales
 
-> **Implementado:** `false`
+> **Implementado:** `true`
 
 Entidad dedicada a MyInvestor. La pantalla de MyInvestor agrupa **2 fondos indexados y 1 roboadvisor**. Está dividida en dos partes:
 
@@ -21,7 +21,7 @@ Todos los campos son `NOT NULL` salvo `codigo_isin` (nulo para el roboadvisor) y
 | `tipo` | ENUM (`fondo`, `roboadvisor`) | Tipo de activo |
 | `fecha_creacion` | TIMESTAMP | Auditoría |
 
-> **Cambio propuesto sobre el modelo actual (V6):** añadir la columna `tipo` y permitir `codigo_isin` nulo, para poder registrar el roboadvisor (que no tiene ISIN de fondo).
+> **Cambio aplicado sobre el modelo planteado (V6):** en este repo las migraciones V1–V16 no existen (el proyecto migra desde V17). Se creó una única migración `V23__create_myinvestor.sql` con ambas tablas completas, ya con `tipo` en `fondos_myinvestor` y `codigo_isin` nullable.
 
 ### Identificador
 
@@ -125,11 +125,13 @@ COMMENT ON COLUMN balances_fondo.fecha_creacion IS 'Auditoría: fecha de creaci�
 - Sin lógica de Hacienda: a diferencia de B100/Revolut/Equito, aquí no se desglosa retención; solo intereses, aporte, retirada y saldo.
 - Patrón hexagonal del proyecto, como `InteresAnualMintos` o `BalanceFondo`.
 
-## Capas de implementación previstas
+## Arquitectura implementada
 
-- **Capa de aplicación**: `FondoMyInvestor`, `BalanceFondo` (domain models), `MyInvestorFundDrivingPort`/`FundBalanceDrivingPort`, `MyInvestorFundUseCase`/`FundBalanceUseCase`, `MyInvestorFundDrivenPort`/`FundBalanceDrivenPort`.
-- **Capa driven**: `FondoMyInvestorMO`, `BalanceFondoMO`, `FondoMyInvestorRepository`, `BalanceFondoRepository`, `FondoMyInvestorDatasourceAdapter`, `BalanceFondoDatasourceAdapter`, `FondoMyInvestorDatasourceMapper`, `BalanceFondoDatasourceMapper`.
-- **Capa driving**: `MyInvestorFundsController` (implementa `MyInvestorFundsApi`) y `FundBalancesController` (implementa `FundBalancesApi`), con `MyInvestorFundApiMapper` y `FundBalanceApiMapper`.
-- **Swagger**: paths `/myinvestor-funds` y `/fund-balances` y schemas `MyInvestorFund`, `MyInvestorFundCreate`, `MyInvestorFundUpdate`, `FundBalance`, `FundBalanceCreate`, `FundBalanceUpdate`.
-- **Flyway**: ya existen `V6__create_crowdlending_fondos_balances.sql` y `V12__add_balance_fondo_campos.sql`. Nueva migración `V21__add_tipo_myinvestor.sql` para añadir `tipo` a `fondos_myinvestor` y dejar `codigo_isin` nullable.
-- **Tests**: no hay IT específico de estas entidades; los CRUD viven en el swagger existente. Se podrá ampliar con un `MyInvestorIT` que cubra los 3 activos.
+Siguiendo el patrón hexagonal del proyecto (como `EquitoBalance`/`EquitoCompra`, con FK entre entidades):
+
+- **Capa de aplicación**: `FondoMyInvestor`, `BalanceFondo` (domain models), `TipoActivoMyInvestor` (domain enum), `MyInvestorFundDrivingPort`/`FundBalanceDrivingPort`, `MyInvestorFundUseCase`/`FundBalanceUseCase`, `MyInvestorFundDrivenPort`/`FundBalanceDrivenPort`.
+- **Capa driven**: `FondoMyInvestorMO`, `BalanceFondoMO` (FK `fondo` con `@ManyToOne(fetch = LAZY)` + `@OnDelete(CASCADE)` + columna duplicada `fondo_id` para leer el id como String), repositorios (`findByAnioAndMes`, `findByFondoIdAndAnioAndMes`), `FondoMyInvestorDatasourceAdapter`/`BalanceFondoDatasourceAdapter` (resuelve el FK con `fondoMyInvestorRepository.findById` y genera UUID en `guardar`), `FondoMyInvestorDatasourceMapper`/`BalanceFondoDatasourceMapper` (resuelve `fondoId` con expresión).
+- **Capa driving**: `MyInvestorFundsController` (implementa `MyInvestorFundsApi`: GET list, GET por id, POST, PUT, DELETE) y `FundBalancesController` (implementa `FundBalancesApi`: GET por `year`+`month`, POST upsert por `(fundId, year, month)`, PUT, DELETE), con `MyInvestorFundApiMapper` y `FundBalanceApiMapper`.
+- **Swagger**: paths `/myinvestor-funds` y `/fund-balances` y schemas `MyInvestorFund`, `MyInvestorFundCreate`, `MyInvestorFundUpdate`, `FundBalance`, `FundBalanceCreate`, `FundBalanceUpdate`. Nombres de campo del DTO: `code`/`name`/`tipo` y `fundId`/`year`/`month`/`balance`/`income`/`contribution`/`expenses`.
+- **Flyway**: `V23__create_myinvestor.sql` con `fondos_myinvestor` (tipo + ISIN nullable) y `balances_fondo` (FK ON DELETE CASCADE, `UNIQUE(fondo_id, anio, mes)`).
+- **Tests**: `MyInvestorEntityIT` con 12 casos: CRUD de activos (fondo con ISIN, roboadvisor sin ISIN, listar, obtener por id, actualizar, eliminar en cascada con balances) y CRUD de balances (defaults en intereses/aporte/retirada, upsert por fondo+año+mes, listar por mes, actualizar parcial, borrar).

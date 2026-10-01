@@ -6,6 +6,7 @@ import com.centimo.api.database.repositories.InteresAnualMintosRepository;
 import com.centimo.api.domain.models.InteresAnualMintos;
 import com.centimo.api.ports.driven.InteresAnualMintosDrivenPort;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,13 +21,25 @@ public class InteresAnualMintosDatasourceAdapter implements InteresAnualMintosDr
   private final InteresAnualMintosDatasourceMapper mapper;
 
   @Override
-  public Optional<InteresAnualMintos> findByAnio(Integer anio) {
-    return interesAnualMintosRepository.findByAnio(anio).map(mapper::toDomain);
+  public Optional<InteresAnualMintos> findById(String id) {
+    return interesAnualMintosRepository.findById(id).map(mapper::toDomain);
+  }
+
+  @Override
+  public Optional<InteresAnualMintos> findByMes(String mes) {
+    return interesAnualMintosRepository.findByMes(mes).map(mapper::toDomain);
+  }
+
+  @Override
+  public List<InteresAnualMintos> findByMesIn(List<String> meses) {
+    return interesAnualMintosRepository.findByMesIn(meses).stream()
+        .map(mapper::toDomain)
+        .toList();
   }
 
   @Override
   public List<InteresAnualMintos> findAll() {
-    return interesAnualMintosRepository.findAll().stream()
+    return interesAnualMintosRepository.findAll(Sort.by(Sort.Direction.DESC, "mes")).stream()
         .map(mapper::toDomain)
         .toList();
   }
@@ -41,14 +54,11 @@ public class InteresAnualMintosDatasourceAdapter implements InteresAnualMintosDr
       entity.setId(UUID.randomUUID().toString());
     }
 
-    entity.setAnio(interes.getAnio());
-    entity.setCantidad(interes.getCantidad());
-    entity.setRetencionImpuestos(interes.getRetencionImpuestos());
-    entity.setTipoImpositivo(interes.getTipoImpositivo());
-    entity.setImporteNeto(interes.getImporteNeto());
+    entity.setMes(interes.getMes());
+    entity.setImporteAñadido(interes.getImporteAñadido());
+    entity.setValorFinal(interes.getValorFinal());
 
-    InteresAnualMintosMO saved = interesAnualMintosRepository.save(entity);
-    return mapper.toDomain(saved);
+    return mapper.toDomain(interesAnualMintosRepository.save(entity));
   }
 
   @Override

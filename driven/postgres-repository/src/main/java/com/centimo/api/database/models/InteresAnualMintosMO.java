@@ -1,6 +1,9 @@
 package com.centimo.api.database.models;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -10,7 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "mintos_intereses_anuales")
+@Table(name = "mintos")
 @Getter
 @Setter
 public class InteresAnualMintosMO {
@@ -19,20 +22,14 @@ public class InteresAnualMintosMO {
   @Column(length = 50)
   private String id;
 
-  @Column(name = "anio", nullable = false, unique = true)
-  private Integer anio;
+  @Column(name = "mes", nullable = false, length = 7)
+  private String mes;
 
-  @Column(name = "cantidad", nullable = false, precision = 12, scale = 2)
-  private BigDecimal cantidad;
+  @Column(name = "importe_añadido", nullable = false, precision = 12, scale = 2)
+  private BigDecimal importeAñadido = BigDecimal.ZERO;
 
-  @Column(name = "retencion_impuestos", nullable = false, precision = 12, scale = 2)
-  private BigDecimal retencionImpuestos;
-
-  @Column(name = "tipo_impositivo", nullable = false, precision = 5, scale = 2)
-  private BigDecimal tipoImpositivo;
-
-  @Column(name = "importe_neto", nullable = false, precision = 12, scale = 2)
-  private BigDecimal importeNeto;
+  @Column(name = "valor_final", nullable = false, precision = 12, scale = 2)
+  private BigDecimal valorFinal;
 
   @CreationTimestamp
   @Column(name = "fecha_creacion", updatable = false)
